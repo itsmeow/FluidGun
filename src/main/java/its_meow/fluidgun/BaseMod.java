@@ -2,6 +2,8 @@ package its_meow.fluidgun;
 
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.item.Item;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -13,6 +15,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class BaseMod {
 	
 	public static Logger LOGGER = null;
+	public static final ItemFluidGun FLUID_GUN = new ItemFluidGun("fluid_gun", 5);
 	
 	 @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -28,5 +31,9 @@ public class BaseMod {
     public void postInit(FMLPostInitializationEvent event) {
 
 	}
+    
+    public static void registerItems(RegistryEvent.Register<Item> event) {
+    	event.getRegistry().register(FLUID_GUN);
+    }
 	
 }
