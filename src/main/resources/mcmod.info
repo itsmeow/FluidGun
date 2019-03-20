@@ -1,0 +1,16 @@
+[
+{
+  "modid": "fluidgun",
+  "name": "[SBM] Fluid Gun",
+  "description": "A single block mod adding a fluid gun which allows players to shoot and suck in liquids at a range.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["its_meow"],
+  "credits": "its_meow: for programming, art, idea",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
