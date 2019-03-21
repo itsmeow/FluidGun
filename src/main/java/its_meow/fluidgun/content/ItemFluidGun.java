@@ -35,78 +35,78 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemFluidGun extends ItemFluidContainer {
 
-	public ItemFluidGun(String name, int capacity, float range) {
-		super(capacity);
-		BaseMod.FluidGunConfig.COUNT.put(name, capacity);
-		BaseMod.FluidGunConfig.RANGE.put(name, range);
-		this.setRegistryName(name);
-		this.setTranslationKey(Ref.MODID + "." + this.getRegistryName().getPath());
-		this.setCreativeTab(CreativeTabs.TOOLS);
-		this.setMaxStackSize(1);
-	}
+    public ItemFluidGun(String name, int capacity, float range) {
+        super(capacity);
+        BaseMod.FluidGunConfig.COUNT.put(name, capacity);
+        BaseMod.FluidGunConfig.RANGE.put(name, range);
+        this.setRegistryName(name);
+        this.setTranslationKey(Ref.MODID + "." + this.getRegistryName().getPath());
+        this.setCreativeTab(CreativeTabs.TOOLS);
+        this.setMaxStackSize(1);
+    }
 
-	@Override
-	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-		RayTraceResult ray = ItemFluidGun.rayTrace(player, BaseMod.FluidGunConfig.RANGE.get(this.getRegistryName().getPath()), 1F);
-		ItemStack stack = player.getHeldItem(hand);
-		if(ray.entityHit == null) {
-			if(ray.typeOfHit == RayTraceResult.Type.BLOCK) {
-				BlockPos pos = ray.getBlockPos();
-				IBlockState state = world.getBlockState(pos);
-				if(world.isBlockLoaded(pos)) {
-					FluidHandlerItemStack handler = (FluidHandlerItemStack) this.getFluidCapability(stack);
-					if(state.getBlock() instanceof IFluidBlock || state.getBlock() instanceof BlockStaticLiquid || state.getBlock() instanceof BlockLiquid) {
-						int breakE = -1;
-						if(!world.isRemote && player instanceof EntityPlayerMP) breakE = ForgeHooks.onBlockBreakEvent(world, ((EntityPlayerMP)player).interactionManager.getGameType(), (EntityPlayerMP) player, pos); // fire break on pos to ensure permission
-						if(breakE != -1) {
-							FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1);
-							if(handler.fill(fstack, false) > 0) {
-								handler.fill(fstack, true);
-								world.setBlockToAir(pos);
-								world.scheduleBlockUpdate(pos, Blocks.AIR, 50, 1);
-								world.notifyBlockUpdate(pos, state, Blocks.AIR.getDefaultState(), 2);
-								world.notifyNeighborsOfStateChange(pos, Blocks.AIR, true);
-							}
-						}
-					} else if(handler.drain(handler.getFluid(), false) != null){
-						FluidStack fstack = handler.drain(1, false);
-						Block fluid = fstack.getFluid().getBlock();
-						if(fluid.canPlaceBlockAt(world, pos.offset(ray.sideHit))) {
-							BlockEvent.PlaceEvent event = new BlockEvent.PlaceEvent(BlockSnapshot.getBlockSnapshot(world, pos.offset(ray.sideHit)), state, player, hand);
-							MinecraftForge.EVENT_BUS.post(event);
-							if(!event.isCanceled()) {
-								handler.drain(1, true);
-								world.setBlockState(pos.offset(ray.sideHit), fluid.getDefaultState(), 1);
-								world.scheduleBlockUpdate(pos.offset(ray.sideHit), fluid, 50, 1);
-								world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), fluid.getDefaultState(), 2);
-								world.notifyNeighborsOfStateChange(pos, fluid, true);
-							}
-						}
-					}
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+        RayTraceResult ray = ItemFluidGun.rayTrace(player, BaseMod.FluidGunConfig.RANGE.get(this.getRegistryName().getPath()), 1F);
+        ItemStack stack = player.getHeldItem(hand);
+        if(ray.entityHit == null) {
+            if(ray.typeOfHit == RayTraceResult.Type.BLOCK) {
+                BlockPos pos = ray.getBlockPos();
+                IBlockState state = world.getBlockState(pos);
+                if(world.isBlockLoaded(pos)) {
+                    FluidHandlerItemStack handler = (FluidHandlerItemStack) this.getFluidCapability(stack);
+                    if(state.getBlock() instanceof IFluidBlock || state.getBlock() instanceof BlockStaticLiquid || state.getBlock() instanceof BlockLiquid) {
+                        int breakE = -1;
+                        if(!world.isRemote && player instanceof EntityPlayerMP) breakE = ForgeHooks.onBlockBreakEvent(world, ((EntityPlayerMP)player).interactionManager.getGameType(), (EntityPlayerMP) player, pos); // fire break on pos to ensure permission
+                        if(breakE != -1) {
+                            FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1);
+                            if(handler.fill(fstack, false) > 0) {
+                                handler.fill(fstack, true);
+                                world.setBlockToAir(pos);
+                                world.scheduleBlockUpdate(pos, Blocks.AIR, 50, 1);
+                                world.notifyBlockUpdate(pos, state, Blocks.AIR.getDefaultState(), 2);
+                                world.notifyNeighborsOfStateChange(pos, Blocks.AIR, true);
+                            }
+                        }
+                    } else if(handler.drain(handler.getFluid(), false) != null){
+                        FluidStack fstack = handler.drain(1, false);
+                        Block fluid = fstack.getFluid().getBlock();
+                        if(fluid.canPlaceBlockAt(world, pos.offset(ray.sideHit))) {
+                            BlockEvent.PlaceEvent event = new BlockEvent.PlaceEvent(BlockSnapshot.getBlockSnapshot(world, pos.offset(ray.sideHit)), state, player, hand);
+                            MinecraftForge.EVENT_BUS.post(event);
+                            if(!event.isCanceled()) {
+                                handler.drain(1, true);
+                                world.setBlockState(pos.offset(ray.sideHit), fluid.getDefaultState(), 1);
+                                world.scheduleBlockUpdate(pos.offset(ray.sideHit), fluid, 50, 1);
+                                world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), fluid.getDefaultState(), 2);
+                                world.notifyNeighborsOfStateChange(pos, fluid, true);
+                            }
+                        }
+                    }
 
-					if(!world.isRemote) {
-						world.scheduleBlockUpdate(pos.offset(ray.sideHit), world.getBlockState(pos).getBlock(), 1, 100);
-						world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
-					}
-				}
-			}
-		}
-		return super.onItemRightClick(world, player, hand);
-	}
+                    if(!world.isRemote) {
+                        world.scheduleBlockUpdate(pos.offset(ray.sideHit), world.getBlockState(pos).getBlock(), 1, 100);
+                        world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
+                    }
+                }
+            }
+        }
+        return super.onItemRightClick(world, player, hand);
+    }
 
-	@Nullable
-	@SideOnly(Side.CLIENT)
-	public static RayTraceResult rayTrace(EntityPlayer player, double blockReachDistance, float partialTicks) {
-		Vec3d vec3d = player.getPositionEyes(partialTicks);
-		Vec3d vec3d1 = player.getLook(partialTicks);
-		Vec3d vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
-		return player.world.rayTraceBlocks(vec3d, vec3d2, true, false, true);
-	}
+    @Nullable
+    @SideOnly(Side.CLIENT)
+    public static RayTraceResult rayTrace(EntityPlayer player, double blockReachDistance, float partialTicks) {
+        Vec3d vec3d = player.getPositionEyes(partialTicks);
+        Vec3d vec3d1 = player.getLook(partialTicks);
+        Vec3d vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
+        return player.world.rayTraceBlocks(vec3d, vec3d2, true, false, true);
+    }
 
 
 
-	public IFluidHandlerItem getFluidCapability(ItemStack stack) {
-		return stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
-	}
+    public IFluidHandlerItem getFluidCapability(ItemStack stack) {
+        return stack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY, null);
+    }
 
 }
