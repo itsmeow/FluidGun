@@ -3,7 +3,6 @@ package its_meow.fluidgun.content;
 import javax.annotation.Nullable;
 
 import its_meow.fluidgun.BaseMod;
-import its_meow.fluidgun.FluidGunItemConfig;
 import its_meow.fluidgun.Ref;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
@@ -36,24 +35,19 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemFluidGun extends ItemFluidContainer {
 
-	private FluidGunItemConfig gunConfig = null;
-
 	public ItemFluidGun(String name, int capacity, float range) {
 		super(capacity);
-		gunConfig = new FluidGunItemConfig(capacity, range);
-		BaseMod.FluidGunConfig.CONFIG.put(name, gunConfig);
+		BaseMod.FluidGunConfig.COUNT.put(name, capacity);
+		BaseMod.FluidGunConfig.RANGE.put(name, range);
 		this.setRegistryName(name);
 		this.setTranslationKey(Ref.MODID + "." + this.getRegistryName().getPath());
 		this.setCreativeTab(CreativeTabs.TOOLS);
-	}
-
-	public void updateConfig(FluidGunItemConfig cfg) {
-		this.gunConfig = cfg;
+		this.setMaxStackSize(1);
 	}
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
-		RayTraceResult ray = ItemFluidGun.rayTrace(player, this.gunConfig.range, 1F);
+		RayTraceResult ray = ItemFluidGun.rayTrace(player, BaseMod.FluidGunConfig.RANGE.get(this.getRegistryName().getPath()), 1F);
 		ItemStack stack = player.getHeldItem(hand);
 		if(ray.entityHit == null) {
 			if(ray.typeOfHit == RayTraceResult.Type.BLOCK) {
