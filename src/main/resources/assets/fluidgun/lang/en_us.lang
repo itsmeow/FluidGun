@@ -2,7 +2,8 @@ item.fluidgun.fluid_gun.name=Fluid Gun
 item.fluidgun.large_fluid_gun.name=Large Fluid Gun
 item.fluidgun.giant_fluid_gun.name=Giant Fluid Gun
 
-item.fluidgun.capacity=Capacity
+item.fluidgun.contents=Contents
+item.fluidgun.max_capacity=Max Capacity
 item.fluidgun.range=Range
 
 item.fluidgun.mode.both.info=Mode: §aBoth

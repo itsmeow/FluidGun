@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import its_meow.fluidgun.BaseMod;
 import its_meow.fluidgun.Ref;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockStaticLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
@@ -24,6 +23,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -65,22 +65,24 @@ public class ItemFluidGun extends ItemFluidContainer {
                 IBlockState state = world.getBlockState(pos);
                 if(world.isBlockLoaded(pos)) {
                     FluidHandlerItemStack handler = (FluidHandlerItemStack) this.getFluidCapability(stack);
-                    if(this.shouldIntake(stack) && state.getBlock() instanceof IFluidBlock
-                            || state.getBlock() instanceof BlockStaticLiquid
-                            || state.getBlock() instanceof BlockLiquid) {
-                        int breakE = -1;
-                        if(!world.isRemote && player instanceof EntityPlayerMP)
-                            breakE = ForgeHooks.onBlockBreakEvent(world,
-                                    ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player,
-                                    pos); // fire break on pos to ensure permission
-                        if(breakE != -1) {
-                            FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1);
-                            if(handler.fill(fstack, false) > 0) {
-                                handler.fill(fstack, true);
-                                world.setBlockToAir(pos);
-                                world.scheduleBlockUpdate(pos, Blocks.AIR, 50, 1);
-                                world.notifyBlockUpdate(pos, state, Blocks.AIR.getDefaultState(), 2);
-                                world.notifyNeighborsOfStateChange(pos, Blocks.AIR, true);
+                    if(state.getBlock() instanceof IFluidBlock
+                            || state.getBlock() instanceof BlockStaticLiquid) {
+                        if(this.shouldIntake(stack)) {
+                            int breakE = -1;
+                            if(!world.isRemote && player instanceof EntityPlayerMP)
+                                breakE = ForgeHooks.onBlockBreakEvent(world,
+                                        ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player,
+                                        pos); // fire break on pos to ensure permission
+                            if(breakE != -1) {
+                                FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1);
+                                if(handler.fill(fstack, false) > 0) {
+                                    handler.fill(fstack, true);
+                                    world.setBlockToAir(pos);
+                                    world.scheduleBlockUpdate(pos, Blocks.AIR, 50, 1);
+                                    world.notifyBlockUpdate(pos, state, Blocks.AIR.getDefaultState(), 2);
+                                    world.notifyNeighborsOfStateChange(pos, Blocks.AIR, true);
+                                    player.sendStatusMessage(new TextComponentString(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContents(handler) + "/" + this.getMaxCapacity()), true);
+                                }
                             }
                         }
                     } else if(this.shouldPlace(stack) && handler.drain(handler.getFluid(), false) != null) {
@@ -97,6 +99,7 @@ public class ItemFluidGun extends ItemFluidContainer {
                                 world.scheduleBlockUpdate(pos.offset(ray.sideHit), fluid, 50, 1);
                                 world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), fluid.getDefaultState(), 2);
                                 world.notifyNeighborsOfStateChange(pos, fluid, true);
+                                player.sendStatusMessage(new TextComponentString(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContents(handler) + "/" + this.getMaxCapacity()), true);
                             }
                         }
                     }
@@ -132,7 +135,8 @@ public class ItemFluidGun extends ItemFluidContainer {
     @Override
     public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
-        tooltip.add(TextFormatting.GOLD + I18n.format("item.fluidgun.capacity") + ": " + TextFormatting.YELLOW
+        tooltip.add(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContents(stack) + "/" + this.getMaxCapacity());
+        tooltip.add(TextFormatting.GOLD + I18n.format("item.fluidgun.max_capacity") + ": " + TextFormatting.YELLOW
                 + this.getMaxCapacity());
         tooltip.add(TextFormatting.GOLD + I18n.format("item.fluidgun.range") + ": " + TextFormatting.YELLOW
                 + this.getRange());
@@ -144,6 +148,14 @@ public class ItemFluidGun extends ItemFluidContainer {
         } else {
             tooltip.add(I18n.format("item.fluidgun.more.info"));
         }
+    }
+
+    private int getContents(ItemStack stack) {
+        return this.getContents((FluidHandlerItemStack) this.getFluidCapability(stack));
+    }
+
+    private int getContents(FluidHandlerItemStack handler) {
+        return (handler == null || handler.getFluid() == null) ? 0 : handler.getFluid().amount;
     }
 
     @Nullable
