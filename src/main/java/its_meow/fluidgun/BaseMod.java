@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.apache.logging.log4j.Logger;
 
 import its_meow.fluidgun.content.ItemFluidGun;
+import its_meow.fluidgun.network.MouseHandler;
+import its_meow.fluidgun.network.MousePacket;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -16,19 +18,25 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import net.minecraftforge.fml.relauncher.Side;
 
 @Mod.EventBusSubscriber // how to: subscribe to pewdiepie
 @Mod(modid = Ref.MODID, name = Ref.NAME, version = Ref.VERSION)
 public class BaseMod {
 
     public static Logger LOGGER = null;
+    public static final SimpleNetworkWrapper NETWORK_INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(Ref.MODID);
     public static final ItemFluidGun FLUID_GUN = new ItemFluidGun("fluid_gun", 5, 30F);
     public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
     public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
+    public static ItemFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN};
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         LOGGER = event.getModLog();
+        NETWORK_INSTANCE.registerMessage(MouseHandler.class, MousePacket.class, 0, Side.SERVER);
     }
 
     @EventHandler
@@ -43,7 +51,6 @@ public class BaseMod {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        ItemFluidGun[] guns = { FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN };
         for(int i = 0; i < guns.length; i++) {
             String name = guns[i].getRegistryName().getPath();
             guns[i] = new ItemFluidGun(name, FluidGunConfig.COUNT.get(name), FluidGunConfig.RANGE.get(name));

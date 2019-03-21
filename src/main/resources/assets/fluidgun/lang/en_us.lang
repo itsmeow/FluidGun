@@ -1,0 +1,16 @@
+item.fluidgun.fluid_gun.name=Fluid Gun
+item.fluidgun.large_fluid_gun.name=Large Fluid Gun
+item.fluidgun.giant_fluid_gun.name=Giant Fluid Gun
+
+item.fluidgun.capacity=Capacity
+item.fluidgun.range=Range
+
+item.fluidgun.mode.both.info=Mode: §aBoth
+item.fluidgun.mode.in.info=Mode: §eIn Only
+item.fluidgun.mode.out.info=Mode: §cOut Only
+
+item.fluidgun.more.info=Hold §bSHIFT§f for more
+
+item.fluidgun.info=Adjusts in-out settings
+item.fluidgun.use.info=§5While holding §bshift:
+item.fluidgun.wheel.info=§bMouse wheel §5to cycle modes
