@@ -1,0 +1,36 @@
+{
+	"_comment": [
+	    "Creates a Fluid Gun"
+	],
+    "type": "minecraft:crafting_shaped",
+    "pattern":
+    [
+        "   ",
+        "   ",
+        "   "
+    ],
+    "key":
+    {
+        "": 
+        {
+            "item": "",
+            "data": 0
+        },
+        "":
+        {
+            "item": "",
+            "data": 0
+        },
+        "":
+        {
+        	"item": "",
+        	"data": 0
+        }
+    },
+    "result":
+    {
+        "item": "fluidgun:fluid_gun",
+        "count": 1,
+        "data": 0
+	}
+}

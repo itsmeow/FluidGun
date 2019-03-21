@@ -5,8 +5,11 @@ import java.util.HashMap;
 import org.apache.logging.log4j.Logger;
 
 import its_meow.fluidgun.content.ItemFluidGun;
+import its_meow.fluidgun.network.ConfigurationPacket;
+import its_meow.fluidgun.network.ConfigurationPacketHandler;
 import its_meow.fluidgun.network.MouseHandler;
 import its_meow.fluidgun.network.MousePacket;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -18,6 +21,7 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -37,6 +41,7 @@ public class BaseMod {
     public void preInit(FMLPreInitializationEvent event) {
         LOGGER = event.getModLog();
         NETWORK_INSTANCE.registerMessage(MouseHandler.class, MousePacket.class, 0, Side.SERVER);
+        NETWORK_INSTANCE.registerMessage(ConfigurationPacketHandler.class, ConfigurationPacket.class, 1, Side.CLIENT);
     }
 
     @EventHandler
@@ -67,6 +72,17 @@ public class BaseMod {
         @Config.Comment("Range a gun can place or take at")
         public static HashMap<String, Float> RANGE = new HashMap<String, Float>();
 
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJoin(PlayerLoggedInEvent e) {
+        if(e.player instanceof EntityPlayerMP) {
+            for(String gun : FluidGunConfig.COUNT.keySet()) {
+                int count = FluidGunConfig.COUNT.get(gun);
+                float range = FluidGunConfig.RANGE.get(gun);
+                NETWORK_INSTANCE.sendTo(new ConfigurationPacket(gun, count, range), (EntityPlayerMP) e.player);
+            }
+        }
     }
 
     @SubscribeEvent
