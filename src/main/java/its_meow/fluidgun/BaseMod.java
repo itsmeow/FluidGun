@@ -11,8 +11,10 @@ import its_meow.fluidgun.network.GunFiredPacket;
 import its_meow.fluidgun.network.GunFiredPacketHandler;
 import its_meow.fluidgun.network.MouseHandler;
 import its_meow.fluidgun.network.MousePacket;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
@@ -38,7 +40,17 @@ public class BaseMod {
     public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
     public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
     public static final ItemFluidGun CREATIVE_FLUID_GUN = new ItemFluidGun("creative_fluid_gun", 10000, 1000F);
+    public static final Item TAB_HOLDER = new Item().setRegistryName("tab_item");
     public static ItemFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN, CREATIVE_FLUID_GUN};
+    
+    public static CreativeTabs tab = new CreativeTabs("fluid_gun") {
+
+        @Override
+        public ItemStack createIcon() {
+            return new ItemStack(FLUID_GUN, 1, 0, null);
+        }
+        
+    };
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -66,6 +78,7 @@ public class BaseMod {
             guns[i] = new ItemFluidGun(name, FluidGunConfig.COUNT.get(name), FluidGunConfig.RANGE.get(name));
         }
         event.getRegistry().registerAll(guns);
+        event.getRegistry().register(TAB_HOLDER);
     }
 
     @Config(modid = Ref.MODID)

@@ -8,6 +8,7 @@ import its_meow.fluidgun.network.GunFiredPacket;
 import its_meow.fluidgun.network.MousePacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -37,6 +38,7 @@ public class ClientEvents {
         for(ItemFluidGun gun : BaseMod.guns) {
             ModelLoader.setCustomModelResourceLocation(gun, 0, new ModelResourceLocation(gun.getRegistryName(), "inventory"));
         }
+        ModelLoader.setCustomModelResourceLocation(BaseMod.TAB_HOLDER, 0, new ModelResourceLocation(BaseMod.TAB_HOLDER.getRegistryName(), "inventory"));
     }
 
     @SubscribeEvent
@@ -46,7 +48,7 @@ public class ClientEvents {
         for(EnumHand hand : EnumHand.values()) {
             ItemStack stack = player.getHeldItem(hand);
             if(stack.getItem() instanceof ItemFluidGun) {
-                if(player.isSneaking() && e.getDwheel() != 0) {
+                if(GuiScreen.isAltKeyDown() && e.getDwheel() != 0) {
                     BaseMod.NETWORK_INSTANCE.sendToServer(new MousePacket(player.inventory.currentItem, e.getDwheel() > 0)); 
                     e.setCanceled(true);
                 }
@@ -68,7 +70,7 @@ public class ClientEvents {
         Item i = ForgeRegistries.ITEMS.getValue(new ResourceLocation(Ref.MODID, gunName));
         if(i != null && i instanceof ItemFluidGun) {
             ItemFluidGun gun = (ItemFluidGun) i;
-            System.out.println(fluidName);
+            //System.out.println(fluidName);
             EntityPlayerSP player = Minecraft.getMinecraft().player;
             ItemStack stack = player.getHeldItem(hand);
             if(stack != null && !stack.isEmpty() && stack.getItem() == gun) {

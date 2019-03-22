@@ -1,0 +1,6 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "fluidgun:items/fluid_gun_2d"
+	}
+}
