@@ -1,4 +1,4 @@
-itemGroup.fluid_gun=Fluid Gun
+itemGroup.fluid_gun=[SBM] Fluid Gun
 
 item.fluidgun.fluid_gun.name=Fluid Gun
 item.fluidgun.large_fluid_gun.name=Large Fluid Gun

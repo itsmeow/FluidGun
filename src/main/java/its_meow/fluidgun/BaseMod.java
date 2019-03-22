@@ -47,7 +47,7 @@ public class BaseMod {
 
         @Override
         public ItemStack createIcon() {
-            return new ItemStack(FLUID_GUN, 1, 0, null);
+            return new ItemStack(TAB_HOLDER);
         }
         
     };
