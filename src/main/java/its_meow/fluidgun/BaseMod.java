@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import its_meow.fluidgun.content.ItemFluidGun;
 import its_meow.fluidgun.network.ConfigurationPacket;
 import its_meow.fluidgun.network.ConfigurationPacketHandler;
+import its_meow.fluidgun.network.GunFiredPacket;
+import its_meow.fluidgun.network.GunFiredPacketHandler;
 import its_meow.fluidgun.network.MouseHandler;
 import its_meow.fluidgun.network.MousePacket;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -41,8 +43,10 @@ public class BaseMod {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         LOGGER = event.getModLog();
-        NETWORK_INSTANCE.registerMessage(MouseHandler.class, MousePacket.class, 0, Side.SERVER);
-        NETWORK_INSTANCE.registerMessage(ConfigurationPacketHandler.class, ConfigurationPacket.class, 1, Side.CLIENT);
+        int packets = 0;
+        NETWORK_INSTANCE.registerMessage(MouseHandler.class, MousePacket.class, packets++, Side.SERVER);
+        NETWORK_INSTANCE.registerMessage(ConfigurationPacketHandler.class, ConfigurationPacket.class, packets++, Side.CLIENT);
+        NETWORK_INSTANCE.registerMessage(GunFiredPacketHandler.class, GunFiredPacket.class, packets++, Side.CLIENT);
     }
 
     @EventHandler

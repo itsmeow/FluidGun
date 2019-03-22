@@ -1,6 +1,7 @@
 package its_meow.fluidgun.content;
 
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
 
@@ -17,7 +18,7 @@ public class FluidHandlerItemStackBuckets extends FluidHandlerItemStack {
         {
             return 0;
         }
-        
+
         FluidStack contained = getFluid();
         if (contained == null)
         {
@@ -83,6 +84,24 @@ public class FluidHandlerItemStackBuckets extends FluidHandlerItemStack {
         }
 
         return drained;
+    }
+
+    public void forceFluid(Fluid fluid, int count, int max) {
+        this.capacity = max;
+        if(count == 0) {
+            this.setContainerToEmpty();
+            return;
+        }
+        if(this.getFluid() == null) this.setFluid(new FluidStack(fluid, count));
+        if(this.getFluid().amount != count) this.getFluid().amount = count;
+    }
+
+    public void setEmpty() {
+        this.setContainerToEmpty();
+    }
+
+    public final int getCapacity() {
+        return this.capacity;
     }
 
 }

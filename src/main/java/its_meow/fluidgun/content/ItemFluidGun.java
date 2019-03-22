@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import its_meow.fluidgun.BaseMod;
 import its_meow.fluidgun.Ref;
+import its_meow.fluidgun.network.GunFiredPacket;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStaticLiquid;
 import net.minecraft.block.state.IBlockState;
@@ -27,10 +28,10 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -68,6 +69,10 @@ public class ItemFluidGun extends ItemFluidContainer {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+        if(world.isRemote) {
+            return super.onItemRightClick(world, player, hand);
+        }
+
         RayTraceResult ray = ItemFluidGun.rayTrace(player, this.getRange(), 1F);
         ItemStack stack = player.getHeldItem(hand);
         if(ray != null && ray.entityHit == null) {
@@ -78,11 +83,7 @@ public class ItemFluidGun extends ItemFluidContainer {
                     FluidHandlerItemStackBuckets handler = (FluidHandlerItemStackBuckets) this.getFluidCapability(stack);
                     if(state.getBlock() instanceof IFluidBlock || state.getBlock() instanceof BlockStaticLiquid) {
                         if(this.shouldIntake(stack)) {
-                            int breakE = 0;
-                            if(!world.isRemote && player instanceof EntityPlayerMP)
-                                breakE = ForgeHooks.onBlockBreakEvent(world,
-                                        ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player,
-                                        pos); // fire break on pos to ensure permission
+                            int breakE = ForgeHooks.onBlockBreakEvent(world, ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player, pos); // fire break on pos to ensure permission
                             if(breakE != -1) {
                                 FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1000);
                                 if(handler.fill(fstack, false) > 0) {
@@ -91,9 +92,7 @@ public class ItemFluidGun extends ItemFluidContainer {
                                     world.scheduleBlockUpdate(pos, Blocks.AIR, 50, 1);
                                     world.notifyBlockUpdate(pos, state, Blocks.AIR.getDefaultState(), 2);
                                     world.notifyNeighborsOfStateChange(pos, Blocks.AIR, true);
-                                    if(world.isRemote) {
-                                        player.sendStatusMessage(new TextComponentString(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContentsBuckets(handler) + "/" + this.getMaxCapacityBuckets()), true);
-                                    }
+                                    BaseMod.NETWORK_INSTANCE.sendTo(new GunFiredPacket(this.getRegistryName().getPath().toString(), handler.getFluid() == null || handler.getFluid().getFluid() == null ? "" : handler.getFluid().getFluid().getName(), hand, this.getContentsBuckets(handler), this.getMaxCapacityBuckets(false, stack)), (EntityPlayerMP) player);
                                     this.spawnPathBetweenReversed(world, player.getPosition().add(0, player.getEyeHeight(), 0), pos.offset(ray.sideHit), state);
                                     boolean isWater = handler.getFluid().getFluid().getBlock() == Blocks.WATER;
                                     world.playSound(player.posX, player.posY, player.posZ, isWater ? SoundEvents.ITEM_BUCKET_FILL : SoundEvents.ITEM_BUCKET_FILL_LAVA, SoundCategory.PLAYERS, 1.0F, 1.0F, false);
@@ -118,9 +117,7 @@ public class ItemFluidGun extends ItemFluidContainer {
                                             world.scheduleBlockUpdate(pos.offset(ray.sideHit), fluid, 50, 1);
                                             world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), fluid.getDefaultState(), 2);
                                             world.notifyNeighborsOfStateChange(pos, fluid, true);
-                                            if(world.isRemote) {
-                                                player.sendStatusMessage(new TextComponentString(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContentsBuckets(handler) + "/" + this.getMaxCapacityBuckets()), true);
-                                            }
+                                            BaseMod.NETWORK_INSTANCE.sendTo(new GunFiredPacket(this.getRegistryName().getPath().toString(), handler.getFluid() == null || handler.getFluid().getFluid() == null ? "" : handler.getFluid().getFluid().getName(), hand, this.getContentsBuckets(handler), this.getMaxCapacityBuckets(false, stack)), (EntityPlayerMP) player);
                                             this.spawnPathBetween(world, player.getPosition().add(0, player.getEyeHeight(), 0), pos.offset(ray.sideHit), fluid.getDefaultState());
                                             world.playSound(player.posX, player.posY, player.posZ, fluid == Blocks.WATER ? SoundEvents.ITEM_BUCKET_EMPTY : SoundEvents.ITEM_BUCKET_EMPTY_LAVA, SoundCategory.PLAYERS, 1.0F, 1.0F, false);
                                         }
@@ -129,11 +126,8 @@ public class ItemFluidGun extends ItemFluidContainer {
                             }
                         }
                     }
-
-                    if(!world.isRemote) {
-                        world.scheduleBlockUpdate(pos.offset(ray.sideHit), world.getBlockState(pos).getBlock(), 1, 100);
-                        world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
-                    }
+                    world.scheduleBlockUpdate(pos.offset(ray.sideHit), world.getBlockState(pos).getBlock(), 1, 100);
+                    world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
                 }
             }
         }
@@ -165,19 +159,29 @@ public class ItemFluidGun extends ItemFluidContainer {
     }
 
     protected void spawnParticle(World world, Vec3d pos, Vec3d dir, double stops, IBlockState state) {
-        world.spawnParticle(EnumParticleTypes.BLOCK_CRACK, pos.x, pos.y, pos.z, dir.x / 5, dir.y / 5, dir.z / 5, Block.getStateId(state));
+        if(!world.isRemote && world instanceof WorldServer) {
+            ((WorldServer)world).spawnParticle(EnumParticleTypes.BLOCK_CRACK, false, pos.x, pos.y, pos.z, 1, dir.x / 5, dir.y / 5, dir.z / 5, 1.0D, Block.getStateId(state));
+        }
     }
 
     public float getRange() {
         return BaseMod.FluidGunConfig.RANGE.get(this.getRegistryName().getPath());
     }
 
-    public int getMaxCapacityMilliBuckets() {
-        return BaseMod.FluidGunConfig.COUNT.get(this.getRegistryName().getPath()) * 1000;
+    public int getMaxCapacityMilliBuckets(boolean isClient, ItemStack stack) {
+        return this.getMaxCapacityBuckets(isClient, stack) * 1000;
     }
 
-    public int getMaxCapacityBuckets() {
-        return BaseMod.FluidGunConfig.COUNT.get(this.getRegistryName().getPath());
+    public int getMaxCapacityBuckets(boolean isClient, ItemStack stack) {
+        int def = BaseMod.FluidGunConfig.COUNT.get(this.getRegistryName().getPath());
+        if(isClient) return def;
+        if(this.getFluidCapability(stack) instanceof FluidHandlerItemStackBuckets) {
+            FluidHandlerItemStackBuckets handler = (FluidHandlerItemStackBuckets) this.getFluidCapability(stack);
+            if(handler != null) {
+                return handler.getCapacity() / 1000;
+            }
+        }
+        return def;
     }
 
     public boolean shouldPlace(ItemStack stack) {
@@ -198,12 +202,12 @@ public class ItemFluidGun extends ItemFluidContainer {
             String fluid = this.localizeFluid(stack);
             tooltip.add((this.getFluidUnlocalizedName(stack).equals("fluid.tile.lava") ? TextFormatting.GOLD : TextFormatting.BLUE) + fluid);
         }
-        tooltip.add(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContentsBuckets(stack) + "/" + this.getMaxCapacityBuckets());
+        tooltip.add(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContentsBuckets(stack) + "/" + this.getMaxCapacityBuckets(true, stack));
         tooltip.add(I18n.format("item.fluidgun.mode." + this.getMode(stack).name().toLowerCase() + ".info"));
         if(GuiScreen.isShiftKeyDown()) {
 
             tooltip.add(TextFormatting.GOLD + I18n.format("item.fluidgun.max_capacity") + ": " + TextFormatting.YELLOW
-                    + this.getMaxCapacityBuckets());
+                    + this.getMaxCapacityBuckets(true, stack));
             tooltip.add(TextFormatting.GOLD + I18n.format("item.fluidgun.range") + ": " + TextFormatting.YELLOW
                     + this.getRange());
 
