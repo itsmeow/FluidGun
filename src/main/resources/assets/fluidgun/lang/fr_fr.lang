@@ -1,0 +1,19 @@
+itemGroup.fluid_gun=[SBM] Fluid Gun
+
+item.fluidgun.fluid_gun.name=Canon à fluide
+item.fluidgun.large_fluid_gun.name=Grand canon à fluide
+item.fluidgun.giant_fluid_gun.name=Canon à fluide géant
+item.fluidgun.creative_fluid_gun.name=Canon à fluide créatif
+
+item.fluidgun.contents=Contenu
+item.fluidgun.max_capacity=Capacité max
+item.fluidgun.range=Portée
+
+item.fluidgun.mode.both.info=Mode : §aLes deux
+item.fluidgun.mode.in.info=Mode : §eEntrée seulement
+item.fluidgun.mode.out.info=Mode : §cSortie seulement
+
+item.fluidgun.more.info=§eMaintenir §cMAJ§e pour plus
+
+item.fluidgun.info=§6Régle les entrées/sorties
+item.fluidgun.wheel.info=§cALT+Molette §epour changer de mode
