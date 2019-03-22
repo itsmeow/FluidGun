@@ -1,5 +1,5 @@
-# \[SBM\] Fluid Gun
-**for Minecraft Forge 1.12**
+<h1 align="center">[SBM] Fluid Gun</h1>
+<h5 align="center">for Minecraft Forge 1.12-1.12.2</h5>
 
 ## What is this mod?
 This mod adds fluid guns that can pick up and shoot out liquid from a distance, while also being highly customizable and adaptable.
