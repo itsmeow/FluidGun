@@ -1,0 +1,6 @@
+{
+	"parent": "fluidgun:item/fluid_gun",
+	"textures": {
+		"1": "fluidgun:items/fluid_gun_3d_large"
+	}
+}

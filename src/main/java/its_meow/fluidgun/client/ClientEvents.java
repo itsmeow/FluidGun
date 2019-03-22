@@ -1,7 +1,6 @@
 package its_meow.fluidgun.client;
 
 import its_meow.fluidgun.BaseMod;
-import its_meow.fluidgun.Ref;
 import its_meow.fluidgun.content.ItemFluidGun;
 import its_meow.fluidgun.network.MousePacket;
 import net.minecraft.client.Minecraft;
@@ -19,12 +18,10 @@ import net.minecraftforge.fml.relauncher.Side;
 @Mod.EventBusSubscriber(value = Side.CLIENT)
 public class ClientEvents {
 
-    public static ModelResourceLocation d2 = new ModelResourceLocation(Ref.MODID + ":fluid_gun", "inventory");
-
     @SubscribeEvent
     public static void modelRegister(ModelRegistryEvent event) {
         for(ItemFluidGun gun : BaseMod.guns) {
-            ModelLoader.setCustomModelResourceLocation(gun, 0, d2);
+            ModelLoader.setCustomModelResourceLocation(gun, 0, new ModelResourceLocation(gun.getRegistryName(), "inventory"));
         }
     }
 
@@ -36,8 +33,7 @@ public class ClientEvents {
             ItemStack stack = player.getHeldItem(hand);
             if(stack.getItem() instanceof ItemFluidGun) {
                 if(player.isSneaking() && e.getDwheel() != 0) {
-                    BaseMod.NETWORK_INSTANCE
-                            .sendToServer(new MousePacket(player.inventory.currentItem, e.getDwheel() > 0));
+                    BaseMod.NETWORK_INSTANCE.sendToServer(new MousePacket(player.inventory.currentItem, e.getDwheel() > 0)); 
                     e.setCanceled(true);
                 }
                 break; // If player is holding two only scroll for one
