@@ -1,0 +1,18 @@
+{
+	"_comment": [
+	    "Creates a Fluid Gun from a Fluid Gun to clear NBT"
+	],
+    "type": "minecraft:crafting_shapeless",
+	"ingredients": [
+	    {
+	        "item": "fluidgun:large_fluid_gun",
+			"data": 0
+	    }
+	],
+    "result":
+    {
+        "item": "fluidgun:large_fluid_gun",
+        "count": 1,
+        "data": 0
+	}
+}

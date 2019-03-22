@@ -1,0 +1,46 @@
+{
+	"_comment": [
+	    "Creates a Giant Fluid Gun"
+	],
+    "type": "minecraft:crafting_shaped",
+    "pattern":
+    [
+        "cec",
+        "pch",
+        "pci"
+    ],
+    "key":
+    {
+        "c": 
+        {
+            "item": "minecraft:cauldron",
+            "data": 0
+        },
+        "p":
+        {
+            "item": "minecraft:piston",
+            "data": 0
+        },
+        "h":
+        {
+        	"item": "minecraft:hopper",
+        	"data": 0
+        },
+        "i":
+        {
+        	"item": "minecraft:iron_ingot",
+        	"data": 0
+        },
+        "e":
+        {
+        	"item": "minecraft:ender_eye",
+        	"data": 0
+        }
+    },
+    "result":
+    {
+        "item": "fluidgun:giant_fluid_gun",
+        "count": 1,
+        "data": 0
+	}
+}

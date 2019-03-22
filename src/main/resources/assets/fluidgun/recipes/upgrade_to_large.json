@@ -5,31 +5,30 @@
     "type": "minecraft:crafting_shaped",
     "pattern":
     [
-        "   ",
-        "   ",
-        "   "
+        " c",
+        "pg"
     ],
     "key":
     {
-        "": 
+        "g": 
         {
-            "item": "",
+            "item": "fluidgun:fluid_gun",
             "data": 0
         },
-        "":
+        "p":
         {
-            "item": "",
+            "item": "minecraft:piston",
             "data": 0
         },
-        "":
+        "c":
         {
-        	"item": "",
+        	"item": "minecraft:cauldron",
         	"data": 0
         }
     },
     "result":
     {
-        "item": "fluidgun:fluid_gun",
+        "item": "fluidgun:large_fluid_gun",
         "count": 1,
         "data": 0
 	}

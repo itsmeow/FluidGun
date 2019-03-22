@@ -1,0 +1,35 @@
+{
+	"_comment": [
+	    "Creates a Fluid Gun"
+	],
+    "type": "minecraft:crafting_shaped",
+    "pattern":
+    [
+        "cc",
+        "eg"
+    ],
+    "key":
+    {
+        "c":
+        {
+        	"item": "minecraft:cauldron",
+        	"data": 0
+        },
+        "e":
+        {
+        	"item": "minecraft:ender_eye",
+        	"data": 0
+        },
+        "g":
+        {
+        	"item": "fluidgun:large_fluid_gun",
+        	"data": 0
+        }
+    },
+    "result":
+    {
+        "item": "fluidgun:giant_fluid_gun",
+        "count": 1,
+        "data": 0
+	}
+}

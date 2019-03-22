@@ -11,6 +11,8 @@ public class ConfigurationPacket implements IMessage {
 
     public int capacity;
     public float range;
+    
+    public ConfigurationPacket() {}
 
     public ConfigurationPacket(String itemName, int capacity, float range) {
         this.itemName = itemName;

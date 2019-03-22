@@ -26,7 +26,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
-@Mod.EventBusSubscriber // how to: subscribe to pewdiepie
+@Mod.EventBusSubscriber // how to: subscribe to pewdiepie?
 @Mod(modid = Ref.MODID, name = Ref.NAME, version = Ref.VERSION)
 public class BaseMod {
 
@@ -35,7 +35,8 @@ public class BaseMod {
     public static final ItemFluidGun FLUID_GUN = new ItemFluidGun("fluid_gun", 5, 30F);
     public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
     public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
-    public static ItemFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN};
+    public static final ItemFluidGun CREATIVE_FLUID_GUN = new ItemFluidGun("creative_fluid_gun", 10000, 1000F);
+    public static ItemFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN, CREATIVE_FLUID_GUN};
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
