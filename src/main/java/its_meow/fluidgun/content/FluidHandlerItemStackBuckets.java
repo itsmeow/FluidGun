@@ -18,6 +18,10 @@ public class FluidHandlerItemStackBuckets extends FluidHandlerItemStack {
         {
             return 0;
         }
+        
+        if(resource.amount < 1000) {
+        	return 0;
+        }
 
         FluidStack contained = getFluid();
         if (contained == null)
@@ -63,6 +67,10 @@ public class FluidHandlerItemStackBuckets extends FluidHandlerItemStack {
         if (contained == null || contained.amount <= 0 || !canDrainFluidType(contained))
         {
             return null;
+        }
+        
+        if(maxDrain < 1000) {
+        	return null;
         }
 
         final int drainAmount = Math.min(contained.amount, maxDrain);
