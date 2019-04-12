@@ -33,7 +33,7 @@ public class ClientEvents {
 
 	@SubscribeEvent
 	public static void modelRegister(ModelRegistryEvent event) {
-		for(ItemFluidGun gun : BaseMod.guns) {
+		for(ItemBaseFluidGun gun : BaseMod.guns) {
 			ModelLoader.setCustomModelResourceLocation(gun, 0, new ModelResourceLocation(gun.getRegistryName(), "inventory"));
 		}
 		ModelLoader.setCustomModelResourceLocation(BaseMod.TAB_HOLDER, 0, new ModelResourceLocation(BaseMod.TAB_HOLDER.getRegistryName(), "inventory"));

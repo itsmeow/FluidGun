@@ -1,8 +1,13 @@
 package its_meow.fluidgun.content;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,10 +18,14 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class ItemEnderFluidGun extends ItemBaseFluidGun {
 
@@ -44,10 +53,10 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
 				if(this.getFluidHandler(stack) != null) {
 					this.onFired(player, world, stack, hand);
 				} else {
-					player.sendStatusMessage(new TextComponentTranslation("fluidgun.handler_invalidated"), false);
+					player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.handler_invalidated"), false);
 				}
 			} else {
-				player.sendStatusMessage(new TextComponentTranslation("fluidgun.set_handler"), false);
+				player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.set_handler"), false);
 			}
 		}
 		return new ActionResult<ItemStack>(EnumActionResult.PASS, player.getHeldItem(hand));
@@ -99,13 +108,13 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
 			IFluidHandler cap = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null);
 			if(cap != null) {
 				if(statusMessage)
-					player.sendStatusMessage(new TextComponentTranslation("fluidgun.valid_handler"), false);
+					player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.valid_handler"), false);
 				return cap;
 			} else if(statusMessage) {
-				player.sendStatusMessage(new TextComponentTranslation("fluidgun.invalid_handler"), false);
+				player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.invalid_handler"), false);
 			}
 		} else if(statusMessage) {
-			player.sendStatusMessage(new TextComponentTranslation("fluidgun.invalid_handler"), false);
+			player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.invalid_handler"), false);
 		}
 		return null;
 	}
@@ -138,5 +147,38 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
 		NBTTagCompound tag = this.getCheckedTag(stack);
 		return tag.hasKey("handlerDim");
 	}
+	
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        super.addInformation(stack, worldIn, tooltip, flagIn);
+        if(this.getContentsBuckets(stack) > 0) {
+            IFluidHandler handler = this.getFluidHandler(stack);
+            for(FluidStack fs : this.getFluidStacks(stack, handler)) {
+                String fluid = this.localizeFluid(stack, handler, fs);
+                tooltip.add((this.getFluidUnlocalizedName(stack, handler, fs).equals("fluid.tile.lava") ? TextFormatting.GOLD : TextFormatting.BLUE) + fluid);
+            }
+        }
+        tooltip.add(TextFormatting.DARK_GRAY + I18n.format("item.fluidgun.contents") + ": " + TextFormatting.GRAY + this.getContentsBuckets(stack) + "/" + this.getMaxCapacityBuckets(true, stack, this.getFluidHandler(stack)));
+        tooltip.add(I18n.format("item.fluidgun.mode." + this.getMode(stack).name().toLowerCase() + ".info"));
+        if(GuiScreen.isShiftKeyDown()) {
+            tooltip.add(TextFormatting.GOLD + I18n.format("item.fluidgun.range") + ": " + TextFormatting.YELLOW
+                    + this.getRange());
+
+            tooltip.add(I18n.format("item.fluidgun.info"));
+            tooltip.add(I18n.format("item.fluidgun.wheel.info"));
+            tooltip.add(I18n.format("item.enderfluidgun.info"));
+            if(this.getFluidHandler(stack) != null && this.hasHandlerPositionTag(stack) && this.hasHandlerDimensionTag(stack)) {
+            	tooltip.add(I18n.format("item.enderfluidgun.linked"));
+            	BlockPos pos = this.getHandlerPosition(stack);
+            	tooltip.add("X: " + pos.getX());
+            	tooltip.add("Y: " + pos.getY());
+            	tooltip.add("Z: " + pos.getZ());
+            	tooltip.add("DIM: " + this.getHandlerDimension(stack));
+            }
+        } else {
+            tooltip.add(I18n.format("item.fluidgun.more.info"));
+        }
+    }
 
 }

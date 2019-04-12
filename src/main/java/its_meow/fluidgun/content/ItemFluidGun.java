@@ -13,10 +13,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -36,17 +33,14 @@ public class ItemFluidGun extends ItemBaseFluidGun {
         this.capacity = capacity * 1000;
         BaseMod.FluidGunConfig.COUNT.put(name, capacity);
     }
+    
+    public void setCapacity(int capacity) {
+    	this.capacity = capacity;
+    }
 
     @Override
     public ICapabilityProvider initCapabilities(@Nonnull ItemStack stack, @Nullable NBTTagCompound nbt) {
         return new FluidHandlerItemStackBuckets(stack, capacity);
-    }
-
-    @Override
-    public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX,
-            float hitY, float hitZ, EnumHand hand) {
-
-        return EnumActionResult.FAIL;
     }
 
     @Override
