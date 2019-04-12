@@ -79,7 +79,7 @@ public class BaseMod {
         for(int i = 0; i < guns.length; i++) {
             String name = guns[i].getRegistryName().getPath();
             if(guns[i] instanceof ItemFluidGun) {
-            	((ItemFluidGun)guns[i]).setCapacity(FluidGunConfig.COUNT.get(name));
+            	((ItemFluidGun)guns[i]).setCapacity(FluidGunConfig.COUNT.get(name) * 1000);
             }
         }
         event.getRegistry().registerAll(guns);
@@ -100,7 +100,7 @@ public class BaseMod {
     @SubscribeEvent
     public static void onPlayerJoin(PlayerLoggedInEvent e) {
         if(e.player instanceof EntityPlayerMP) {
-            for(String gun : FluidGunConfig.COUNT.keySet()) {
+            for(String gun : FluidGunConfig.RANGE.keySet()) {
                 int count = FluidGunConfig.COUNT.get(gun);
                 float range = FluidGunConfig.RANGE.get(gun);
                 NETWORK_INSTANCE.sendTo(new ConfigurationPacket(gun, count, range), (EntityPlayerMP) e.player);
