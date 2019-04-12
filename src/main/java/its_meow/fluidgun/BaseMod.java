@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import org.apache.logging.log4j.Logger;
 
+import its_meow.fluidgun.content.ItemEnderFluidGun;
 import its_meow.fluidgun.content.ItemFluidGun;
 import its_meow.fluidgun.network.ConfigurationPacket;
 import its_meow.fluidgun.network.ConfigurationPacketHandler;
@@ -40,6 +41,7 @@ public class BaseMod {
     public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
     public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
     public static final ItemFluidGun CREATIVE_FLUID_GUN = new ItemFluidGun("creative_fluid_gun", 10000, 1000F);
+    public static final ItemEnderFluidGun ENDER_FLUID_GUN = new ItemEnderFluidGun("ender_fluid_gun", 1, 50F);
     public static final Item TAB_HOLDER = new Item().setRegistryName("tab_item");
     public static ItemFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN, CREATIVE_FLUID_GUN};
     
@@ -78,7 +80,7 @@ public class BaseMod {
             guns[i] = new ItemFluidGun(name, FluidGunConfig.COUNT.get(name), FluidGunConfig.RANGE.get(name));
         }
         event.getRegistry().registerAll(guns);
-        event.getRegistry().register(TAB_HOLDER);
+        event.getRegistry().registerAll(TAB_HOLDER, ENDER_FLUID_GUN);
     }
 
     @Config(modid = Ref.MODID)

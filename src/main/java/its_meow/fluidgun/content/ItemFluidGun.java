@@ -242,7 +242,7 @@ public class ItemFluidGun extends ItemFluidContainer {
         }
     }
 
-    private String getFluidUnlocalizedName(ItemStack stack) {
+    protected String getFluidUnlocalizedName(ItemStack stack) {
         FluidHandlerItemStackBuckets handler = ((FluidHandlerItemStackBuckets) this.getFluidCapability(stack));
         if(handler == null || handler.getFluid() == null) {
             return "";
@@ -250,7 +250,7 @@ public class ItemFluidGun extends ItemFluidContainer {
         return handler.getFluid().getUnlocalizedName();
     }
 
-    private String localizeFluid(ItemStack stack) {
+    protected String localizeFluid(ItemStack stack) {
         FluidHandlerItemStackBuckets handler = ((FluidHandlerItemStackBuckets) this.getFluidCapability(stack));
         if(handler == null || handler.getFluid() == null) {
             return "";
@@ -268,11 +268,11 @@ public class ItemFluidGun extends ItemFluidContainer {
         return res;
     }
 
-    private int getContentsBuckets(ItemStack stack) {
+    protected int getContentsBuckets(ItemStack stack) {
         return this.getContentsBuckets((FluidHandlerItemStackBuckets) this.getFluidCapability(stack));
     }
 
-    private int getContentsBuckets(FluidHandlerItemStackBuckets handler) {
+    protected int getContentsBuckets(FluidHandlerItemStackBuckets handler) {
         return (handler == null || handler.getFluid() == null) ? 0 : handler.getFluid().amount / 1000;
     }
 
