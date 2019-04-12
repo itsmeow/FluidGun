@@ -46,13 +46,16 @@ repositories {
         url = "modmaven.k-4u.nl"
     }
     maven {
-        url "https://maven.mcmoddev.com/"
+        url = "https://maven.mcmoddev.com/"
     }
     maven {
         url = 'https://maven.blamejared.com'
     }
     maven {
-        url "http://maven.tterrag.com/"
+        url = "http://maven.tterrag.com/"
+	}
+	maven {
+		url = "http://chickenbones.net/maven/"
 	}
 	maven {
         url = "https://minecraft.curseforge.com/api/maven/"
@@ -69,6 +72,7 @@ dependencies {
 	deobfCompile 'cofh:ThermalExpansion:1.12.2-5.5.3.41:universal'
     deobfCompile "team.chisel.ctm:CTM:MC1.12.2-0.3.3.22"
 	deobfCompile "team.chisel:Chisel:MC1.12.2-0.2.1.35"
+	deobfCompile 'codechicken:CodeChickenLib:1.12.2-3.2.2.353:universal'
 }
 
 processResources {
