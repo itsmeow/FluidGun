@@ -6,14 +6,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import its_meow.fluidgun.BaseMod;
-import net.minecraft.block.BlockStaticLiquid;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
@@ -21,13 +17,10 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
@@ -62,41 +55,7 @@ public class ItemFluidGun extends ItemBaseFluidGun {
             return super.onItemRightClick(world, player, hand);
         }
 
-        boolean e = true;
-        int c = 0;
-
-        do {
-            RayTraceResult ray = (c == 0 ? ItemFluidGun.rayTrace(player, this.getRange(), 1F, true) : ItemFluidGun.rayTrace(player, this.getRange(), 1F, false));
-            ItemStack stack = player.getHeldItem(hand);
-            if(ray != null && ray.entityHit == null) {
-                if(ray.typeOfHit == RayTraceResult.Type.BLOCK) {
-                    BlockPos pos = ray.getBlockPos();
-                    IBlockState state = world.getBlockState(pos);
-                    EnumFacing side = ray.sideHit;
-                    if(world.isBlockLoaded(pos) && pos.getY() >= 0 && pos.getY() < world.provider.getHeight() && pos.offset(side).getY() >= 0 && pos.offset(side).getY() < world.provider.getHeight()) {
-                        FluidHandlerItemStackBuckets handler = (FluidHandlerItemStackBuckets) this.getFluidHandler(stack);
-                        if(c == 0 && state.getBlock() instanceof IFluidBlock || state.getBlock() instanceof BlockStaticLiquid) {
-                            if(this.shouldIntake(stack)) {
-                                int breakE = ForgeHooks.onBlockBreakEvent(world, ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player, pos); // fire break on pos to ensure permission
-                                if(breakE != -1) {
-                                    this.takeAndFill(handler, state, side, world, player, pos, hand, stack);
-                                    e = false;
-                                }
-                            }
-                        } else if(c != 0 && this.shouldPlace(stack) && !(state.getBlock() instanceof IFluidBlock || state.getBlock() instanceof BlockStaticLiquid) && (state.getBlock() == Blocks.SNOW_LAYER || state.isSideSolid(world, pos, side) || state.getBlock().isReplaceable(world, pos.offset(side)))) {
-                            if(state.getBlock() == Blocks.SNOW_LAYER || state.getBlock().isReplaceable(world, pos)) pos = pos.offset(side.getOpposite());
-                            this.placeAndDrain(handler, state, side, world, player, pos, hand, stack);
-                        }
-                        world.scheduleBlockUpdate(pos.offset(side), world.getBlockState(pos).getBlock(), 1, 100);
-                        world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
-                    }
-                }
-            }
-            if(c != 0) {
-                e = false;
-            }
-            c++;
-        } while(e);
+        this.onFired(player, world, player.getHeldItem(hand), hand);
         return super.onItemRightClick(world, player, hand);
     }
 

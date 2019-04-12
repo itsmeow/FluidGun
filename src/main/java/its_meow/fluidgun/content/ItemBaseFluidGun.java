@@ -9,6 +9,7 @@ import its_meow.fluidgun.BaseMod;
 import its_meow.fluidgun.Ref;
 import its_meow.fluidgun.network.GunFiredPacket;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockStaticLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -29,12 +30,14 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 
@@ -187,7 +190,8 @@ public abstract class ItemBaseFluidGun extends Item {
 
     protected void takeAndFill(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack) {
         FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1000);
-        if(handler.fill(fstack, false) > 0) {
+        int amt = handler.fill(fstack, false);
+        if(amt >= 1000) {
             handler.fill(fstack, true);
             world.setBlockToAir(pos);
             world.scheduleBlockUpdate(pos, Blocks.AIR, 50, 1);
@@ -265,5 +269,42 @@ public abstract class ItemBaseFluidGun extends Item {
             ((WorldServer)world).spawnParticle(EnumParticleTypes.BLOCK_CRACK, false, pos.x, pos.y, pos.z, 1, dir.x / 5, dir.y / 5, dir.z / 5, 1.0D, Block.getStateId(state));
         }
     }
+    
+    protected void onFired(EntityPlayer player, World world, ItemStack stack, EnumHand hand) {
+        boolean e = true;
+        int c = 0;
 
+        do {
+            RayTraceResult ray = (c == 0 ? ItemFluidGun.rayTrace(player, this.getRange(), 1F, true) : ItemFluidGun.rayTrace(player, this.getRange(), 1F, false));
+            if(ray != null && ray.entityHit == null) {
+                if(ray.typeOfHit == RayTraceResult.Type.BLOCK) {
+                    BlockPos pos = ray.getBlockPos();
+                    IBlockState state = world.getBlockState(pos);
+                    EnumFacing side = ray.sideHit;
+                    if(world.isBlockLoaded(pos) && pos.getY() >= 0 && pos.getY() < world.provider.getHeight() && pos.offset(side).getY() >= 0 && pos.offset(side).getY() < world.provider.getHeight()) {
+                        IFluidHandler handler = this.getFluidHandler(stack);
+                        if(c == 0 && state.getBlock() instanceof IFluidBlock || state.getBlock() instanceof BlockStaticLiquid) {
+                            if(this.shouldIntake(stack)) {
+                                int breakE = ForgeHooks.onBlockBreakEvent(world, ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player, pos); // fire break on pos to ensure permission
+                                if(breakE != -1) {
+                                    this.takeAndFill(handler, state, side, world, player, pos, hand, stack);
+                                    e = false;
+                                }
+                            }
+                        } else if(c != 0 && this.shouldPlace(stack) && !(state.getBlock() instanceof IFluidBlock || state.getBlock() instanceof BlockStaticLiquid) && (state.getBlock() == Blocks.SNOW_LAYER || state.isSideSolid(world, pos, side) || state.getBlock().isReplaceable(world, pos.offset(side)))) {
+                            if(state.getBlock() == Blocks.SNOW_LAYER || state.getBlock().isReplaceable(world, pos)) pos = pos.offset(side.getOpposite());
+                            this.placeAndDrain(handler, state, side, world, player, pos, hand, stack);
+                        }
+                        world.scheduleBlockUpdate(pos.offset(side), world.getBlockState(pos).getBlock(), 1, 100);
+                        world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
+                    }
+                }
+            }
+            if(c != 0) {
+                e = false;
+            }
+            c++;
+        } while(e);
+    }
+    
 }
