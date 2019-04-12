@@ -206,7 +206,7 @@ public abstract class ItemBaseFluidGun extends Item {
 
     protected void placeAndDrain(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack) {
         FluidStack fstack = handler.drain(1000, false);
-        if(fstack != null  && fstack.amount > 0) {
+        if(fstack != null  && fstack.amount >= 1000 && fstack.amount % 1000 == 0) {
             Fluid fluidF = fstack.getFluid();
             if(fluidF != null) {
                 Block fluid = fluidF.getBlock();
