@@ -1,6 +1,6 @@
 package its_meow.fluidgun.network;
 
-import its_meow.fluidgun.content.ItemFluidGun;
+import its_meow.fluidgun.content.ItemBaseFluidGun;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -15,8 +15,8 @@ public class MouseHandler implements IMessageHandler<MousePacket, IMessage> {
         EntityPlayerMP player = ctx.getServerHandler().player;
 
         ItemStack stack = player.inventory.getStackInSlot(p.slot);
-        if(stack != null && stack.getItem() instanceof ItemFluidGun) {
-            ItemFluidGun gun = (ItemFluidGun) stack.getItem();
+        if(stack != null && stack.getItem() instanceof ItemBaseFluidGun) {
+            ItemBaseFluidGun gun = (ItemBaseFluidGun) stack.getItem();
             gun.handleMouseWheelAction(stack, player, false, p.forward);
         }
 
