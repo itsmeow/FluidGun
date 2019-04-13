@@ -24,4 +24,4 @@ item.enderfluidgun.linked=§aLié
 item.enderfluidgun.invalid_handler=Réservoir de fluide invalide. Non sélectionné.
 item.enderfluidgun.valid_handler=Réservoir de fluide valide. Réservoir sélectionné!
 item.enderfluidgun.handler_invalidated=Réservoir de fluide plus valide. Sélectionnez-en un nouveau.
-item.enderfluidgun.set_handler=§ePas de réservoir lié! §cMAJ+Clic droit§b pour lier à un réservoir de fluide
+item.enderfluidgun.set_handler=§ePas de réservoir lié! §eMAJ+Clic droit§b pour lier à un réservoir de fluide
