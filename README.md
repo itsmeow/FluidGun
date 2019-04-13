@@ -17,6 +17,7 @@ Sure! Here's a basic rundown of all the features!
  *  Limit action with **Alt+Scroll Wheel**, allowing only shooting/pickup or both
  *  **Support for claiming systems**
  *  **In-game configuration** updating
+ *  **Ender/Remote fluid gun**, links to any fluid handler
 
 And for those who want a technical rundown:
  *  Multiple guns with different ranges and capacities (as well as a creative gun)
@@ -32,6 +33,7 @@ And for those who want a technical rundown:
  *  In-game configuration via Mod Options
  *  Real-time config disk sync
  *  3D JSON Item Model with unique textures for each type (Made with Blockbench)
+ *  Ender/Remote fluid gun, links to any fluid capability (tanks, fluid transposer, etc)
 
 ## What in the world does SBM stand for?
 
