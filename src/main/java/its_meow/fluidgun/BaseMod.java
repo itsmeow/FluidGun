@@ -38,13 +38,6 @@ public class BaseMod {
 
     public static Logger LOGGER = null;
     public static final SimpleNetworkWrapper NETWORK_INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(Ref.MODID);
-    public static final ItemFluidGun FLUID_GUN = new ItemFluidGun("fluid_gun", 5, 30F);
-    public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
-    public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
-    public static final ItemFluidGun CREATIVE_FLUID_GUN = new ItemFluidGun("creative_fluid_gun", 10000, 1000F);
-    public static final ItemEnderFluidGun ENDER_FLUID_GUN = new ItemEnderFluidGun("ender_fluid_gun", 50F);
-    public static final Item TAB_HOLDER = new Item().setRegistryName("tab_item");
-    public static ItemBaseFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN, ENDER_FLUID_GUN, CREATIVE_FLUID_GUN};
     
     public static CreativeTabs tab = new CreativeTabs("fluid_gun") {
 
@@ -54,6 +47,14 @@ public class BaseMod {
         }
         
     };
+    
+    public static final ItemFluidGun FLUID_GUN = new ItemFluidGun("fluid_gun", 5, 30F);
+    public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
+    public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
+    public static final ItemEnderFluidGun ENDER_FLUID_GUN = new ItemEnderFluidGun("ender_fluid_gun", 50F);
+    public static final ItemFluidGun CREATIVE_FLUID_GUN = new ItemFluidGun("creative_fluid_gun", 10000, 1000F);
+    public static final Item TAB_HOLDER = new Item().setRegistryName("tab_item");
+    public static ItemBaseFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN, ENDER_FLUID_GUN, CREATIVE_FLUID_GUN};
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
@@ -76,10 +77,10 @@ public class BaseMod {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        for(int i = 0; i < guns.length; i++) {
-            String name = guns[i].getRegistryName().getPath();
-            if(guns[i] instanceof ItemFluidGun) {
-            	((ItemFluidGun)guns[i]).setCapacity(FluidGunConfig.COUNT.get(name) * 1000);
+        for(ItemBaseFluidGun gun : guns) {
+            String name = gun.getRegistryName().getPath();
+            if(gun instanceof ItemFluidGun) {
+            	((ItemFluidGun)gun).setCapacity(FluidGunConfig.COUNT.get(name) * 1000);
             }
         }
         event.getRegistry().registerAll(guns);

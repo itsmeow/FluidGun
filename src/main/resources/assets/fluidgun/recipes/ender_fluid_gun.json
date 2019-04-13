@@ -1,0 +1,41 @@
+{
+	"_comment": [
+	    "Creates an Ender Fluid Gun"
+	],
+    "type": "minecraft:crafting_shaped",
+    "pattern":
+    [
+        "  d",
+        "eeh",
+        "  b"
+    ],
+    "key":
+    {
+        "b":
+        {
+            "item": "minecraft:blaze_rod",
+            "data": 0
+        },
+        "h":
+        {
+        	"item": "minecraft:hopper",
+        	"data": 0
+        },
+        "d":
+        {
+        	"item": "minecraft:diamond",
+        	"data": 0
+        },
+        "e":
+        {
+        	"item": "minecraft:ender_eye",
+        	"data": 0
+        }
+    },
+    "result":
+    {
+        "item": "fluidgun:ender_fluid_gun",
+        "count": 1,
+        "data": 0
+	}
+}
