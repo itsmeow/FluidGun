@@ -36,85 +36,88 @@ import net.minecraftforge.fml.relauncher.Side;
 @Mod(modid = Ref.MODID, name = Ref.NAME, version = Ref.VERSION)
 public class BaseMod {
 
-    public static Logger LOGGER = null;
-    public static final SimpleNetworkWrapper NETWORK_INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(Ref.MODID);
-    
-    public static CreativeTabs tab = new CreativeTabs("fluid_gun") {
+	public static Logger LOGGER = null;
+	public static final SimpleNetworkWrapper NETWORK_INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(Ref.MODID);
 
-        @Override
-        public ItemStack createIcon() {
-            return new ItemStack(TAB_HOLDER);
-        }
-        
-    };
-    
-    public static final ItemFluidGun FLUID_GUN = new ItemFluidGun("fluid_gun", 5, 30F);
-    public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
-    public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
-    public static final ItemEnderFluidGun ENDER_FLUID_GUN = new ItemEnderFluidGun("ender_fluid_gun", 50F);
-    public static final ItemFluidGun CREATIVE_FLUID_GUN = new ItemFluidGun("creative_fluid_gun", 10000, 1000F);
-    public static final Item TAB_HOLDER = new Item().setRegistryName("tab_item");
-    public static ItemBaseFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN, ENDER_FLUID_GUN, CREATIVE_FLUID_GUN};
+	public static CreativeTabs tab = new CreativeTabs("fluid_gun") {
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        LOGGER = event.getModLog();
-        int packets = 0;
-        NETWORK_INSTANCE.registerMessage(MouseHandler.class, MousePacket.class, packets++, Side.SERVER);
-        NETWORK_INSTANCE.registerMessage(ConfigurationPacketHandler.class, ConfigurationPacket.class, packets++, Side.CLIENT);
-        NETWORK_INSTANCE.registerMessage(GunFiredPacketHandler.class, GunFiredPacket.class, packets++, Side.CLIENT);
-    }
+		@Override
+		public ItemStack createIcon() {
+			return new ItemStack(TAB_HOLDER);
+		}
 
-    @EventHandler
-    public void init(FMLInitializationEvent event) {
+	};
 
-    }
+	public static final ItemFluidGun FLUID_GUN = new ItemFluidGun("fluid_gun", 5, 30F);
+	public static final ItemFluidGun LARGE_FLUID_GUN = new ItemFluidGun("large_fluid_gun", 10, 50F);
+	public static final ItemFluidGun GIANT_FLUID_GUN = new ItemFluidGun("giant_fluid_gun", 25, 80F);
+	public static final ItemEnderFluidGun ENDER_FLUID_GUN = new ItemEnderFluidGun("ender_fluid_gun", 50F);
+	public static final ItemFluidGun CREATIVE_FLUID_GUN = new ItemFluidGun("creative_fluid_gun", 10000, 1000F);
+	public static final Item TAB_HOLDER = new Item().setRegistryName("tab_item");
+	public static ItemBaseFluidGun[] guns = {FLUID_GUN, LARGE_FLUID_GUN, GIANT_FLUID_GUN, ENDER_FLUID_GUN, CREATIVE_FLUID_GUN};
 
-    @EventHandler
-    public void postInit(FMLPostInitializationEvent event) {
+	@EventHandler
+	public void preInit(FMLPreInitializationEvent event) {
+		LOGGER = event.getModLog();
+		int packets = 0;
+		NETWORK_INSTANCE.registerMessage(MouseHandler.class, MousePacket.class, packets++, Side.SERVER);
+		NETWORK_INSTANCE.registerMessage(ConfigurationPacketHandler.class, ConfigurationPacket.class, packets++, Side.CLIENT);
+		NETWORK_INSTANCE.registerMessage(GunFiredPacketHandler.class, GunFiredPacket.class, packets++, Side.CLIENT);
+	}
 
-    }
+	@EventHandler
+	public void init(FMLInitializationEvent event) {
 
-    @SubscribeEvent
-    public static void registerItems(RegistryEvent.Register<Item> event) {
-        for(ItemBaseFluidGun gun : guns) {
-            String name = gun.getRegistryName().getPath();
-            if(gun instanceof ItemFluidGun) {
-            	((ItemFluidGun)gun).setCapacity(FluidGunConfig.COUNT.get(name) * 1000);
-            }
-        }
-        event.getRegistry().registerAll(guns);
-        event.getRegistry().register(TAB_HOLDER);
-    }
+	}
 
-    @Config(modid = Ref.MODID)
-    public static class FluidGunConfig {
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event) {
 
-        @Config.RequiresMcRestart
-        @Config.Comment("Amount of buckets that can be held")
-        public static HashMap<String, Integer> COUNT = new HashMap<String, Integer>();
-        @Config.Comment("Range a gun can place or take at")
-        public static HashMap<String, Float> RANGE = new HashMap<String, Float>();
+	}
 
-    }
+	@SubscribeEvent
+	public static void registerItems(RegistryEvent.Register<Item> event) {
+		for(ItemBaseFluidGun gun : guns) {
+			String name = gun.getRegistryName().getPath();
+			if(gun instanceof ItemFluidGun) {
+				((ItemFluidGun)gun).setCapacity(FluidGunConfig.COUNT.get(name) * 1000);
+			}
+		}
+		event.getRegistry().registerAll(guns);
+		event.getRegistry().register(TAB_HOLDER);
+	}
 
-    @SubscribeEvent
-    public static void onPlayerJoin(PlayerLoggedInEvent e) {
-        if(e.player instanceof EntityPlayerMP) {
-            for(String gun : FluidGunConfig.RANGE.keySet()) {
-                int count = FluidGunConfig.COUNT.get(gun);
-                float range = FluidGunConfig.RANGE.get(gun);
-                NETWORK_INSTANCE.sendTo(new ConfigurationPacket(gun, count, range), (EntityPlayerMP) e.player);
-            }
-        }
-    }
+	@Config(modid = Ref.MODID)
+	public static class FluidGunConfig {
 
-    @SubscribeEvent
-    public static void onConfigChanged(ConfigChangedEvent event) {
-        if(event.getModID().equals(Ref.MODID)) {
-            ConfigManager.sync(event.getModID(), Config.Type.INSTANCE);
+		@Config.RequiresMcRestart
+		@Config.Comment("Amount of buckets that can be held")
+		public static HashMap<String, Integer> COUNT = new HashMap<String, Integer>();
+		@Config.Comment("Range a gun can place or take at")
+		public static HashMap<String, Float> RANGE = new HashMap<String, Float>();
 
-        }
-    }
+	}
+
+	@SubscribeEvent
+	public static void onPlayerJoin(PlayerLoggedInEvent e) {
+		if(e.player instanceof EntityPlayerMP) {
+			for(String gun : FluidGunConfig.RANGE.keySet()) {
+				int count = 0;
+				if(FluidGunConfig.COUNT.containsKey(gun)) {
+					count = FluidGunConfig.COUNT.get(gun);
+				}
+				float range = FluidGunConfig.RANGE.get(gun);
+				NETWORK_INSTANCE.sendTo(new ConfigurationPacket(gun, count, range), (EntityPlayerMP) e.player);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void onConfigChanged(ConfigChangedEvent event) {
+		if(event.getModID().equals(Ref.MODID)) {
+			ConfigManager.sync(event.getModID(), Config.Type.INSTANCE);
+
+		}
+	}
 
 }
