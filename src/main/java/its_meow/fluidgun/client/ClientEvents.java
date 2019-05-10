@@ -28,7 +28,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ClientEvents {
 
     @SubscribeEvent
-    public static void mouseEvent(MouseScrollEvent e) {
+    public static void mouseEvent(MouseScrollEvent.Pre e) {
         EntityPlayer player = Minecraft.getInstance().player;
 
         for(EnumHand hand : EnumHand.values()) {

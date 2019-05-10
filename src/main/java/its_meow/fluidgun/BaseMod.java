@@ -25,7 +25,7 @@ import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 
-@Mod.EventBusSubscriber // how to: subscribe to pewdiepie?
+@Mod.EventBusSubscriber(modid = Ref.MODID, bus = Mod.EventBusSubscriber.Bus.MOD) // how to: subscribe to pewdiepie?
 @Mod(value = Ref.MODID)
 public class BaseMod {
 
@@ -55,7 +55,6 @@ public class BaseMod {
     };
     
     public BaseMod() {
-
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
 
         FluidGunConfigMain.setupConfig();
@@ -64,7 +63,7 @@ public class BaseMod {
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, FluidGunConfigMain.SERVER_CONFIG);
     }
 
-    public void setup(FMLCommonSetupEvent event) {
+    private void setup(final FMLCommonSetupEvent event) {
         int packets = 0;
         HANDLER.registerMessage(packets++, MousePacket.class, MousePacket::encode, MousePacket::decode, MousePacket.Handler::handle);
         HANDLER.registerMessage(packets++, ConfigurationPacket.class, ConfigurationPacket::encode, ConfigurationPacket::decode, ConfigurationPacket.Handler::handle);
