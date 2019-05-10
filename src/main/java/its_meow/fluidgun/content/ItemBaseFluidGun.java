@@ -25,7 +25,6 @@ import net.minecraft.particles.BlockParticleData;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceFluidMode;
@@ -38,7 +37,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fluids.Fluid;
-import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
@@ -188,6 +186,7 @@ public abstract class ItemBaseFluidGun extends Item {
     }
 
     protected void takeAndFill(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack, ItemUseContext ctx, BlockItemUseContext bctx) {
+        /*
         FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1000);
         if(handler.fill(fstack, false) > 0) {
             handler.fill(fstack, true);
@@ -198,7 +197,7 @@ public abstract class ItemBaseFluidGun extends Item {
             this.spawnPathBetweenReversed(world, player.getPosition().add(0, player.getEyeHeight(), 0), pos.offset(side), state);
             boolean isWater = !this.getFluids(stack, handler).contains(FluidRegistry.LAVA);
             world.playSound(player.posX, player.posY, player.posZ, isWater ? SoundEvents.ITEM_BUCKET_FILL : SoundEvents.ITEM_BUCKET_FILL_LAVA, SoundCategory.PLAYERS, 1.0F, 1.0F, false);
-        }
+        }*/
     }
 
     protected void placeAndDrain(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack, ItemUseContext ctx, BlockItemUseContext bctx) {
