@@ -1,12 +1,16 @@
 package its_meow.fluidgun.network;
 
+import java.util.function.Supplier;
+
 import com.google.common.base.Charsets;
 
-import io.netty.buffer.ByteBuf;
+import its_meow.fluidgun.client.ClientEvents;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumHand;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class GunFiredPacket implements IMessage {
+public class GunFiredPacket {
 
     public String gunName = "";
     public EnumHand hand = EnumHand.MAIN_HAND;
@@ -22,22 +26,33 @@ public class GunFiredPacket implements IMessage {
         this.max = max;
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeInt(gunName.length());
-        buf.writeCharSequence(gunName, Charsets.UTF_8);
-        buf.writeInt(hand.ordinal());
-        buf.writeInt(count);
-        buf.writeInt(max);
+    public static void encode(GunFiredPacket pkt, PacketBuffer buf) {
+        buf.writeInt(pkt.gunName.length());
+        buf.writeCharSequence(pkt.gunName, Charsets.UTF_8);
+        buf.writeInt(pkt.hand.ordinal());
+        buf.writeInt(pkt.count);
+        buf.writeInt(pkt.max);
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
+    public static GunFiredPacket decode(PacketBuffer buf) {
         int len1 = buf.readInt();
-        this.gunName = buf.readCharSequence(len1, Charsets.UTF_8).toString();
-        this.hand = EnumHand.values()[buf.readInt()];
-        this.count = buf.readInt();
-        this.max = buf.readInt();
+        String gunName = buf.readCharSequence(len1, Charsets.UTF_8).toString();
+        EnumHand hand = EnumHand.values()[buf.readInt()];
+        int count = buf.readInt();
+        int max = buf.readInt();
+        return new GunFiredPacket(gunName, hand, count, max);
+    }
+    
+    public static class Handler {
+        
+        public static void handle(GunFiredPacket msg, Supplier<NetworkEvent.Context> ctx) {
+            if(ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
+                return;
+            }
+            
+            ClientEvents.onGunFired(msg);
+        }
+        
     }
 
 }

@@ -1,0 +1,21 @@
+{
+    "itemGroup.fluid_gun": "[SBM] Fluid Gun",
+
+    "item.fluidgun.fluid_gun": "Fluid Gun",
+    "item.fluidgun.large_fluid_gun": "Large Fluid Gun",
+    "item.fluidgun.giant_fluid_gun": "Giant Fluid Gun",
+    "item.fluidgun.creative_fluid_gun": "Creative Fluid Gun",
+
+    "item.fluidgun.contents": "§8Contents: §7%s/%s",
+    "item.fluidgun.max_capacity": "§6Max Capacity: §e%s",
+    "item.fluidgun.range": "Range: §e%s",
+
+    "item.fluidgun.mode.both.info": "Mode: §aBoth",
+    "item.fluidgun.mode.in.info": "Mode: §eIn Only",
+    "item.fluidgun.mode.out.info": "Mode: §cOut Only",
+
+    "item.fluidgun.more.info": "§eHold §cSHIFT§e for more",
+
+    "item.fluidgun.info": "§6Adjusts in-out settings",
+    "item.fluidgun.wheel.info": "§cALT+Mouse wheel §eto cycle modes"
+}

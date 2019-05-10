@@ -1,0 +1,14 @@
+modLoader="javafml" #mandatory
+loaderVersion="[24,)" #mandatory (24 is current forge version)
+issueTrackerURL="http://github.com/itsmeow/FluidGun/issues" #optional
+displayURL="https://minecraft.curseforge.com/projects/sbm-fluid-gun" #optional
+logoFile="fluid_gun_mod_icon.png" #optional
+credits="its_meow: for programming, art, idea" #optional
+authors="its_meow" #optional
+[[mods]] #mandatory
+modId="fluidgun" #mandatory
+version="1.13-1.1.0" #mandatory
+displayName="[SBM] Fluid Gun" #mandatory
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+A single block mod adding a fluid gun which allows players to shoot and suck in liquids at a range.'''

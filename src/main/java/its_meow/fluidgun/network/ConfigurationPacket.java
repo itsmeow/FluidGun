@@ -1,17 +1,21 @@
 package its_meow.fluidgun.network;
 
+import java.util.function.Supplier;
+
 import com.google.common.base.Charsets;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import its_meow.fluidgun.FluidGunConfigMain;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class ConfigurationPacket implements IMessage {
+public class ConfigurationPacket {
 
     public String itemName;
 
     public int capacity;
     public float range;
-    
+
     public ConfigurationPacket() {}
 
     public ConfigurationPacket(String itemName, int capacity, float range) {
@@ -20,20 +24,32 @@ public class ConfigurationPacket implements IMessage {
         this.range = range;
     }
 
-    @Override
-    public void fromBytes(ByteBuf buf) {
+    public static ConfigurationPacket decode(PacketBuffer buf) {
         int len = buf.readInt();
-        this.itemName = buf.readCharSequence(len, Charsets.UTF_8).toString();
-        this.capacity = buf.readInt();
-        this.range = buf.readFloat();
+        String itemName = buf.readCharSequence(len, Charsets.UTF_8).toString();
+        int capacity = buf.readInt();
+        float range = buf.readFloat();
+        return new ConfigurationPacket(itemName, capacity, range);
     }
 
-    @Override
-    public void toBytes(ByteBuf buf) {
-        buf.writeInt(itemName.length());
-        buf.writeCharSequence(itemName, Charsets.UTF_8);
-        buf.writeInt(this.capacity);
-        buf.writeFloat(this.range);
+    public static void encode(ConfigurationPacket pkt, PacketBuffer buf) {
+        buf.writeInt(pkt.itemName.length());
+        buf.writeCharSequence(pkt.itemName, Charsets.UTF_8);
+        buf.writeInt(pkt.capacity);
+        buf.writeFloat(pkt.range);
+    }
+
+    public static class Handler {
+
+        public static void handle(ConfigurationPacket msg, Supplier<NetworkEvent.Context> ctx) {
+            if(ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
+                return;
+            }
+
+            FluidGunConfigMain.GunConfig.COUNT.put(msg.itemName, msg.capacity);
+            FluidGunConfigMain.GunConfig.RANGE.put(msg.itemName, msg.range);
+        }
+
     }
 
 }

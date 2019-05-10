@@ -1,9 +1,14 @@
 package its_meow.fluidgun.network;
 
-import io.netty.buffer.ByteBuf;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import java.util.function.Supplier;
 
-public class MousePacket implements IMessage {
+import its_meow.fluidgun.content.ItemBaseFluidGun;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
+
+public class MousePacket {
 
     int slot;
     boolean forward;
@@ -16,15 +21,29 @@ public class MousePacket implements IMessage {
         this.forward = forward;
     }
 
-    @Override
-    public void toBytes(ByteBuf buffer) {
-        buffer.writeInt(slot);
-        buffer.writeBoolean(forward);
+    public static void encode(MousePacket pkt, PacketBuffer buffer) {
+        buffer.writeInt(pkt.slot);
+        buffer.writeBoolean(pkt.forward);
     }
 
-    @Override
-    public void fromBytes(ByteBuf buffer) {
-        slot = buffer.readInt();
-        forward = buffer.readBoolean();
+    public static MousePacket decode(PacketBuffer buffer) {
+        int slot = buffer.readInt();
+        boolean forward = buffer.readBoolean();
+        return new MousePacket(slot, forward);
     }
+    
+    public static class Handler {
+        
+        public static void handle(MousePacket p, Supplier<NetworkEvent.Context> ctx) {
+            EntityPlayerMP player = ctx.get().getSender();
+
+            ItemStack stack = player.inventory.getStackInSlot(p.slot);
+            if(stack != null && stack.getItem() instanceof ItemBaseFluidGun) {
+                ItemBaseFluidGun gun = (ItemBaseFluidGun) stack.getItem();
+                gun.handleMouseWheelAction(stack, player, false, p.forward);
+            }
+        }
+        
+    }
+    
 }

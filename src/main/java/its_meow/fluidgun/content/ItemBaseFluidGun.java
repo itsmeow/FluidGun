@@ -6,7 +6,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import its_meow.fluidgun.BaseMod;
-import its_meow.fluidgun.Ref;
+import its_meow.fluidgun.FluidGunConfigMain;
 import its_meow.fluidgun.network.GunFiredPacket;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -14,16 +14,21 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Particles;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.particles.BlockParticleData;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceFluidMode;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -37,17 +42,16 @@ import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.fml.network.NetworkDirection;
 
 public abstract class ItemBaseFluidGun extends Item {
 
     public static final String NBT_MODE = "toolMode";
 
     public ItemBaseFluidGun(String name, float range) {
-        BaseMod.FluidGunConfig.RANGE.put(name, range);
+        super(new Item.Properties().maxStackSize(1).group(BaseMod.tab));
+        FluidGunConfigMain.GunConfig.RANGE.put(name, range);
         this.setRegistryName(name);
-        this.setTranslationKey(Ref.MODID + "." + this.getRegistryName().getPath());
-        this.setCreativeTab(BaseMod.tab);
-        this.setMaxStackSize(1);
     }
 
     @Override
@@ -56,15 +60,13 @@ public abstract class ItemBaseFluidGun extends Item {
     }
 
     @Override
-    public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX,
-            float hitY, float hitZ, EnumHand hand) {
-
+    public EnumActionResult onItemUseFirst(ItemStack stack, ItemUseContext context) {
         return EnumActionResult.FAIL;
     }
 
     @Nullable
-    public static RayTraceResult rayTrace(EntityPlayer player, double blockReachDistance, float partialTicks, boolean liquid) {
-        Vec3d vec3d = player.getPositionEyes(partialTicks);
+    public static RayTraceResult rayTrace(EntityPlayer player, double blockReachDistance, float partialTicks, RayTraceFluidMode liquid) {
+        Vec3d vec3d = player.getEyePosition(partialTicks);
         Vec3d vec3d1 = player.getLook(partialTicks);
         Vec3d vec3d2 = vec3d.add(vec3d1.x * blockReachDistance, vec3d1.y * blockReachDistance, vec3d1.z * blockReachDistance);
         return player.world.rayTraceBlocks(vec3d, vec3d2, liquid, false, true);
@@ -82,17 +84,17 @@ public abstract class ItemBaseFluidGun extends Item {
     }
 
     public ScrollMode getMode(ItemStack stack) {
-        if(stack.getTagCompound() != null) {
-            return ScrollMode.get(stack.getTagCompound().getInteger(NBT_MODE));
+        if(stack.getTag() != null) {
+            return ScrollMode.get(stack.getTag().getInt(NBT_MODE));
         }
         return ScrollMode.BOTH;
     }
 
     public void setMode(ItemStack stack, ScrollMode mode) {
-        if(stack.getTagCompound() == null) {
-            stack.setTagCompound(new NBTTagCompound());
+        if(stack.getTag() == null) {
+            stack.setTag(new NBTTagCompound());
         }
-        stack.getTagCompound().setInteger(NBT_MODE, mode.ordinal());
+        stack.getTag().putInt(NBT_MODE, mode.ordinal());
     }
 
     protected Set<Fluid> getFluids(ItemStack stack, IFluidHandler handler) {
@@ -152,7 +154,7 @@ public abstract class ItemBaseFluidGun extends Item {
             res = I18n.format(fs.getFluid().getBlock().getTranslationKey());
         }
         if(res.startsWith("fluid.") || res.startsWith("tile.")) {
-            res = I18n.format(fs.getFluid().getBlock().getLocalizedName());
+            res = I18n.format(fs.getFluid().getBlock().getNameTextComponent().getFormattedText());
         }
         return res;
     }
@@ -182,43 +184,40 @@ public abstract class ItemBaseFluidGun extends Item {
     }
 
     public float getRange() {
-        return BaseMod.FluidGunConfig.RANGE.get(this.getRegistryName().getPath());
+        return FluidGunConfigMain.GunConfig.RANGE.get(this.getRegistryName().getPath());
     }
 
-    protected void takeAndFill(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack) {
+    protected void takeAndFill(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack, ItemUseContext ctx, BlockItemUseContext bctx) {
         FluidStack fstack = new FluidStack(FluidRegistry.lookupFluidForBlock(state.getBlock()), 1000);
         if(handler.fill(fstack, false) > 0) {
             handler.fill(fstack, true);
-            world.setBlockToAir(pos);
-            world.scheduleBlockUpdate(pos, Blocks.AIR, 50, 1);
+            world.setBlockState(pos, Blocks.AIR.getDefaultState());
             world.notifyBlockUpdate(pos, state, Blocks.AIR.getDefaultState(), 2);
-            world.notifyNeighborsOfStateChange(pos, Blocks.AIR, true);
-            BaseMod.NETWORK_INSTANCE.sendTo(new GunFiredPacket(this.getRegistryName().getPath().toString(), hand, this.getContentsBuckets(stack, handler), this.getMaxCapacityBuckets(false, stack, handler)), (EntityPlayerMP) player);
+            world.notifyNeighborsOfStateChange(pos, Blocks.AIR);
+            BaseMod.HANDLER.sendTo(new GunFiredPacket(this.getRegistryName().getPath().toString(), hand, this.getContentsBuckets(stack, handler), this.getMaxCapacityBuckets(false, stack, handler)), ((EntityPlayerMP) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
             this.spawnPathBetweenReversed(world, player.getPosition().add(0, player.getEyeHeight(), 0), pos.offset(side), state);
             boolean isWater = !this.getFluids(stack, handler).contains(FluidRegistry.LAVA);
             world.playSound(player.posX, player.posY, player.posZ, isWater ? SoundEvents.ITEM_BUCKET_FILL : SoundEvents.ITEM_BUCKET_FILL_LAVA, SoundCategory.PLAYERS, 1.0F, 1.0F, false);
         }
     }
 
-    protected void placeAndDrain(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack) {
+    protected void placeAndDrain(IFluidHandler handler, IBlockState state, EnumFacing side, World world, EntityPlayer player, BlockPos pos, EnumHand hand, ItemStack stack, ItemUseContext ctx, BlockItemUseContext bctx) {
         FluidStack fstack = handler.drain(1000, false);
         if(fstack != null  && fstack.amount > 0) {
             Fluid fluidF = fstack.getFluid();
             if(fluidF != null) {
                 Block fluid = fluidF.getBlock();
                 if(fluid != null) {
-                    if(fluid.canPlaceBlockAt(world, pos.offset(side)) && world.isSideSolid(pos, side) || world.getBlockState(pos.offset(side)).getBlock().isReplaceable(world, pos.offset(side))) {
-                        BlockEvent.PlaceEvent event = new BlockEvent.PlaceEvent(
-                                BlockSnapshot.getBlockSnapshot(world, pos.offset(side)), state, player,
-                                hand);
+                    if(world.getBlockState(pos.offset(side)).isReplaceable(bctx)) {
+                        BlockEvent.EntityPlaceEvent event = new BlockEvent.EntityPlaceEvent(
+                                BlockSnapshot.getBlockSnapshot(world, pos.offset(side)), state, player);
                         MinecraftForge.EVENT_BUS.post(event);
-                        if(!event.isCanceled() && world.mayPlace(fluid, pos.offset(side), true, side, player)) {
+                        if(!event.isCanceled() && player.canPlayerEdit(pos, side, stack)) {
                             handler.drain(1000, true);
                             world.setBlockState(pos.offset(side), fluid.getDefaultState(), 1);
-                            world.scheduleBlockUpdate(pos.offset(side), fluid, 50, 1);
                             world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), fluid.getDefaultState(), 2);
-                            world.notifyNeighborsOfStateChange(pos, fluid, true);
-                            BaseMod.NETWORK_INSTANCE.sendTo(new GunFiredPacket(this.getRegistryName().getPath().toString(), hand, this.getContentsBuckets(stack, handler), this.getMaxCapacityBuckets(false, stack, handler)), (EntityPlayerMP) player);
+                            world.notifyNeighborsOfStateChange(pos, fluid);
+                            BaseMod.HANDLER.sendTo(new GunFiredPacket(this.getRegistryName().getPath().toString(), hand, this.getContentsBuckets(stack, handler), this.getMaxCapacityBuckets(false, stack, handler)), ((EntityPlayerMP) player).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
                             this.spawnPathBetween(world, player.getPosition().add(0, player.getEyeHeight(), 0), pos.offset(side), fluid.getDefaultState());
                             world.playSound(player.posX, player.posY, player.posZ, fluid == Blocks.WATER ? SoundEvents.ITEM_BUCKET_EMPTY : SoundEvents.ITEM_BUCKET_EMPTY_LAVA, SoundCategory.PLAYERS, 1.0F, 1.0F, false);
                         }
@@ -262,7 +261,8 @@ public abstract class ItemBaseFluidGun extends Item {
 
     protected void spawnParticle(World world, Vec3d pos, Vec3d dir, double stops, IBlockState state) {
         if(!world.isRemote && world instanceof WorldServer) {
-            ((WorldServer)world).spawnParticle(EnumParticleTypes.BLOCK_CRACK, false, pos.x, pos.y, pos.z, 1, dir.x / 5, dir.y / 5, dir.z / 5, 1.0D, Block.getStateId(state));
+            WorldServer worldS = (WorldServer) world;
+            worldS.<BlockParticleData>spawnParticle(new BlockParticleData(Particles.BLOCK, state), pos.x, pos.y, pos.z, 1, dir.x / 5, dir.y / 5, dir.z / 5, 1.0D);
         }
     }
 
