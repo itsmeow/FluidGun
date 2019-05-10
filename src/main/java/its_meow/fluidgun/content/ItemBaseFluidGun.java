@@ -33,11 +33,13 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fml.network.NetworkDirection;
@@ -263,6 +265,44 @@ public abstract class ItemBaseFluidGun extends Item {
             WorldServer worldS = (WorldServer) world;
             worldS.<BlockParticleData>spawnParticle(new BlockParticleData(Particles.BLOCK, state), pos.x, pos.y, pos.z, 1, dir.x / 5, dir.y / 5, dir.z / 5, 1.0D);
         }
+    }
+    
+    protected void onFired(EntityPlayer player, World world, ItemStack stack, EnumHand hand) {
+        boolean e = true;
+        int c = 0;
+
+        do {
+            RayTraceResult ray = (c == 0 ? ItemFluidGun.rayTrace(player, this.getRange(), 1F, RayTraceFluidMode.SOURCE_ONLY) : ItemFluidGun.rayTrace(player, this.getRange(), 1F, RayTraceFluidMode.NEVER));
+            if(ray != null && ray.entity == null) {
+                if(ray.type == RayTraceResult.Type.BLOCK) {
+                    BlockPos pos = ray.getBlockPos();
+                    IBlockState state = world.getBlockState(pos);
+                    EnumFacing side = ray.sideHit;
+                    ItemUseContext ctx = new ItemUseContext(player, stack, pos, side, (float) ray.hitVec.x, (float) ray.hitVec.y, (float) ray.hitVec.z);
+                    BlockItemUseContext bctx = new BlockItemUseContext(ctx);
+                    if(world.isBlockLoaded(pos) && pos.getY() >= 0 && pos.getY() < world.getHeight() && pos.offset(side).getY() >= 0 && pos.offset(side).getY() < world.getHeight()) {
+                        FluidHandlerItemStackBuckets handler = (FluidHandlerItemStackBuckets) this.getFluidHandler(stack);
+                        if(c == 0 && state.getBlock() instanceof IFluidBlock) {
+                            if(this.shouldIntake(stack)) {
+                                int breakE = ForgeHooks.onBlockBreakEvent(world, ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player, pos); // fire break on pos to ensure permission
+                                if(breakE != -1) {
+                                    this.takeAndFill(handler, state, side, world, player, pos, hand, stack, ctx, bctx);
+                                    e = false;
+                                }
+                            }
+                        } else if(c != 0 && this.shouldPlace(stack) && !(state.getBlock() instanceof IFluidBlock) && (state.getBlock() == Blocks.SNOW || state.isReplaceable(bctx))) {
+                            if(state.getBlock() == Blocks.SNOW || state.isReplaceable(bctx)) pos = pos.offset(side.getOpposite());
+                            this.placeAndDrain(handler, state, side, world, player, pos, hand, stack, ctx, bctx);
+                        }
+                        world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
+                    }
+                }
+            }
+            if(c != 0) {
+                e = false;
+            }
+            c++;
+        } while(e);
     }
 
 }

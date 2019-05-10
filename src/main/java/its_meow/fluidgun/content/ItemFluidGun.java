@@ -6,22 +6,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import its_meow.fluidgun.FluidGunConfigMain;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceFluidMode;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -29,10 +20,8 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandlerItem;
@@ -46,7 +35,11 @@ public class ItemFluidGun extends ItemBaseFluidGun {
         this.capacity = capacity * 1000;
         FluidGunConfigMain.GunConfig.COUNT.put(name, capacity);
     }
-
+    
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+    
     @Override
     public ICapabilityProvider initCapabilities(@Nonnull ItemStack stack, @Nullable NBTTagCompound nbt) {
         return new FluidHandlerItemStackBuckets(stack, capacity);
@@ -58,42 +51,7 @@ public class ItemFluidGun extends ItemBaseFluidGun {
             return super.onItemRightClick(world, player, hand);
         }
 
-        boolean e = true;
-        int c = 0;
-
-        do {
-            RayTraceResult ray = (c == 0 ? ItemFluidGun.rayTrace(player, this.getRange(), 1F, RayTraceFluidMode.SOURCE_ONLY) : ItemFluidGun.rayTrace(player, this.getRange(), 1F, RayTraceFluidMode.NEVER));
-            ItemStack stack = player.getHeldItem(hand);
-            if(ray != null && ray.entity == null) {
-                if(ray.type == RayTraceResult.Type.BLOCK) {
-                    BlockPos pos = ray.getBlockPos();
-                    IBlockState state = world.getBlockState(pos);
-                    EnumFacing side = ray.sideHit;
-                    ItemUseContext ctx = new ItemUseContext(player, stack, pos, side, (float) ray.hitVec.x, (float) ray.hitVec.y, (float) ray.hitVec.z);
-                    BlockItemUseContext bctx = new BlockItemUseContext(ctx);
-                    if(world.isBlockLoaded(pos) && pos.getY() >= 0 && pos.getY() < world.getHeight() && pos.offset(side).getY() >= 0 && pos.offset(side).getY() < world.getHeight()) {
-                        FluidHandlerItemStackBuckets handler = (FluidHandlerItemStackBuckets) this.getFluidHandler(stack);
-                        if(c == 0 && state.getBlock() instanceof IFluidBlock) {
-                            if(this.shouldIntake(stack)) {
-                                int breakE = ForgeHooks.onBlockBreakEvent(world, ((EntityPlayerMP) player).interactionManager.getGameType(), (EntityPlayerMP) player, pos); // fire break on pos to ensure permission
-                                if(breakE != -1) {
-                                    this.takeAndFill(handler, state, side, world, player, pos, hand, stack, ctx, bctx);
-                                    e = false;
-                                }
-                            }
-                        } else if(c != 0 && this.shouldPlace(stack) && !(state.getBlock() instanceof IFluidBlock) && (state.getBlock() == Blocks.SNOW || state.isReplaceable(bctx))) {
-                            if(state.getBlock() == Blocks.SNOW || state.isReplaceable(bctx)) pos = pos.offset(side.getOpposite());
-                            this.placeAndDrain(handler, state, side, world, player, pos, hand, stack, ctx, bctx);
-                        }
-                        world.notifyBlockUpdate(pos, Blocks.AIR.getDefaultState(), world.getBlockState(pos), 2);
-                    }
-                }
-            }
-            if(c != 0) {
-                e = false;
-            }
-            c++;
-        } while(e);
+        this.onFired(player, world, player.getHeldItem(hand), hand);
         return super.onItemRightClick(world, player, hand);
     }
 

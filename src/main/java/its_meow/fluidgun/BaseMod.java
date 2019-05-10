@@ -3,6 +3,7 @@ package its_meow.fluidgun;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import its_meow.fluidgun.content.ItemBaseFluidGun;
 import its_meow.fluidgun.content.ItemEnderFluidGun;
 import its_meow.fluidgun.content.ItemFluidGun;
 import its_meow.fluidgun.network.ConfigurationPacket;
@@ -72,20 +73,24 @@ public class BaseMod {
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
-        for(int i = 0; i < guns.length; i++) {
-            String name = guns[i].getRegistryName().getPath();
-            guns[i] = new ItemFluidGun(name, FluidGunConfigMain.GunConfig.COUNT.get(name), FluidGunConfigMain.GunConfig.RANGE.get(name));
+        for(ItemBaseFluidGun gun : guns) {
+            String name = gun.getRegistryName().getPath();
+            if(gun instanceof ItemFluidGun) {
+                ((ItemFluidGun)gun).setCapacity(FluidGunConfigMain.GunConfig.COUNT.get(name) * 1000);
+            }
         }
         event.getRegistry().registerAll(guns);
-        String name = ENDER_FLUID_GUN.getRegistryName().getPath();
-        event.getRegistry().registerAll(TAB_HOLDER, new ItemEnderFluidGun(name, FluidGunConfigMain.GunConfig.RANGE.get(name)));
+        event.getRegistry().register(TAB_HOLDER);
     }
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerLoggedInEvent e) {
         if(e.getPlayer() instanceof EntityPlayerMP) {
-            for(String gun : FluidGunConfigMain.GunConfig.COUNT.keySet()) {
-                int count = FluidGunConfigMain.GunConfig.COUNT.get(gun);
+            for(String gun : FluidGunConfigMain.GunConfig.RANGE.keySet()) {
+                int count = 0;
+                if(FluidGunConfigMain.GunConfig.COUNT.containsKey(gun)) {
+                    count = FluidGunConfigMain.GunConfig.COUNT.get(gun);
+                }
                 float range = FluidGunConfigMain.GunConfig.RANGE.get(gun);
                 HANDLER.sendTo(new ConfigurationPacket(gun, count, range), ((EntityPlayerMP) e.getPlayer()).connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
             }
