@@ -1,5 +1,5 @@
 <h1 align="center">[SBM] Fluid Gun</h1>
-<h5 align="center">for Minecraft Forge 1.12-1.12.2</h5>
+<h5 align="center">for Minecraft Forge</h5>
 
 ## What is this mod?
 This mod adds fluid guns that can pick up and shoot out liquid from a distance, while also being highly customizable and adaptable.
@@ -42,7 +42,7 @@ Single Block Mods are a style of mod first established by BuiltBroken modding [s
     This makes many of the mods in the series perfect for filling gaps in modpacks. 
     Allowing pack developers to reduce the need to include larger mods to complete a feature list. 
 
-I do have permission to use "the brand" from DarkGuardsman himself.
+I do have permission to use "the brand" from QueenOfMissiles herself.
 
 
 ## Contact Info, Help, Discussion, and Suggestions

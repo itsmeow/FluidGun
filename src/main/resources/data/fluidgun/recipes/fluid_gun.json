@@ -13,34 +13,28 @@
     {
         "c": 
         {
-            "item": "minecraft:cauldron",
-            "data": 0
+            "item": "minecraft:cauldron"
         },
         "b":
         {
-        	"item": "minecraft:bucket",
-        	"data": 0
+        	"item": "minecraft:bucket"
         },
         "p":
         {
-            "item": "minecraft:piston",
-            "data": 0
+            "item": "minecraft:piston"
         },
         "h":
         {
-        	"item": "minecraft:hopper",
-        	"data": 0
+        	"item": "minecraft:hopper"
         },
         "i":
         {
-        	"item": "minecraft:iron_ingot",
-        	"data": 0
+        	"item": "minecraft:iron_ingot"
         }
     },
     "result":
     {
         "item": "fluidgun:fluid_gun",
-        "count": 1,
-        "data": 0
+        "count": 1
 	}
 }

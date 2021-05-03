@@ -1,0 +1,16 @@
+{
+	"_comment": [
+	    "Creates an Ender Fluid Gun from an Ender Fluid Gun to clear NBT"
+	],
+    "type": "minecraft:crafting_shapeless",
+	"ingredients": [
+	    {
+	        "item": "fluidgun:ender_fluid_gun"
+	    }
+	],
+    "result":
+    {
+        "item": "fluidgun:ender_fluid_gun",
+        "count": 1
+	}
+}

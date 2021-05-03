@@ -1,68 +1,70 @@
-package its_meow.fluidgun.content;
+package dev.itsmeow.fluidgun.content;
 
-import java.util.List;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import net.minecraft.client.gui.GuiScreen;
+import dev.itsmeow.fluidgun.FluidGunMod;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class ItemEnderFluidGun extends ItemBaseFluidGun {
 
     public ItemEnderFluidGun(String name, float range) {
-        super(name, range);
+        super(name, range, new Item.Properties().group(FluidGunMod.GROUP));
     }
 
     @Override
-    public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+    public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getHeldItem(hand);
         if(world.isRemote) {
-            return new ActionResult<ItemStack>(EnumActionResult.PASS, player.getHeldItem(hand));
+            return new ActionResult<>(ActionResultType.PASS, player.getHeldItem(hand));
         }
         if(player.isSneaking()) {
-            RayTraceResult ray = this.rayTrace(world, player, false);
-            if(ray != null && ray.type == RayTraceResult.Type.BLOCK) {
-                BlockPos pos = ray.getBlockPos();
+            BlockRayTraceResult ray = this.rayTrace(world, player, RayTraceContext.FluidMode.NONE);
+            if(ray != null && ray.getType() == RayTraceResult.Type.BLOCK) {
+                BlockPos pos = ray.getPos();
                 if(this.isValidHandler(player, player.world, pos, true)) {
                     this.writeHandlerPosition(stack, pos);
-                    this.writeHandlerDimension(stack, world.getDimension().getType().getId());
+                    this.writeHandlerDimension(stack, world.getDimensionKey());
                 }
             }
         } else {
             if(this.hasHandlerPositionTag(stack) && this.hasHandlerDimensionTag(stack)) {
                 if(this.getFluidHandler(stack) != null) {
-                    this.onFired(player, world, stack, hand);
+                    this.onFired((ServerPlayerEntity) player, world, stack, hand);
                 } else {
-                    player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.handler_invalidated"), false);
+                    player.sendStatusMessage(new TranslationTextComponent("item.enderfluidgun.handler_invalidated"), false);
                 }
             } else {
-                player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.set_handler"), false);
+                player.sendStatusMessage(new TranslationTextComponent("item.enderfluidgun.set_handler"), false);
             }
         }
-        return new ActionResult<ItemStack>(EnumActionResult.PASS, player.getHeldItem(hand));
         /*ItemStack stack = player.getHeldItem(hand);
         if(world.isRemote) {
             return new ActionResult<ItemStack>(EnumActionResult.PASS, player.getHeldItem(hand));
@@ -116,25 +118,25 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
         //FluidHandlerItemStackBuckets handler = (FluidHandlerItemStackBuckets) this.getFluidCapability(stack);
         //if(handler != null) {
           //  BaseMod.NETWORK_INSTANCE.sendTo(new GunFiredPacket(this.getRegistryName().getPath().toString(), handler.getFluid() == null || handler.getFluid().getFluid() == null ? "" : handler.getFluid().getFluid().getName(), hand, this.getContentsBuckets(handler), this.getMaxCapacityBuckets(false, stack)), (EntityPlayerMP) player);
-        //}
-        return new ActionResult<ItemStack>(EnumActionResult.PASS, player.getHeldItem(hand));*/
+        //}*/
+        return new ActionResult<>(ActionResultType.PASS, player.getHeldItem(hand));
     }
 
-    private void writeHandlerDimension(ItemStack stack, int dimension) {
-        NBTTagCompound tag = this.getCheckedTag(stack);
-        tag.putInt("handlerDim", dimension);
+    private void writeHandlerDimension(ItemStack stack, RegistryKey<World> dimension) {
+        CompoundNBT tag = this.getCheckedTag(stack);
+        tag.putString("handlerDim", dimension.getLocation().toString());
     }
 
     @Nonnull
-    public NBTTagCompound getCheckedTag(@Nonnull ItemStack stack) {
+    public CompoundNBT getCheckedTag(@Nonnull ItemStack stack) {
         if(!stack.hasTag()) {
-            stack.setTag(new NBTTagCompound());
+            stack.setTag(new CompoundNBT());
         }
         return stack.getTag();
     }
 
     public void writeHandlerPosition(@Nonnull ItemStack stack, @Nonnull BlockPos pos) {
-        NBTTagCompound tag = this.getCheckedTag(stack);
+        CompoundNBT tag = this.getCheckedTag(stack);
         tag.putInt("handlerX", pos.getX());
         tag.putInt("handlerY", pos.getX());
         tag.putInt("handlerZ", pos.getX());
@@ -142,8 +144,8 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
 
     @Nullable
     public BlockPos getHandlerPosition(@Nonnull ItemStack stack) {
-        NBTTagCompound tag = this.getCheckedTag(stack);
-        if(!tag.hasUniqueId("handlerX") || !tag.hasUniqueId("handlerY") || !tag.hasUniqueId("handlerZ")) {
+        CompoundNBT tag = this.getCheckedTag(stack);
+        if(!tag.contains("handlerX") || !tag.contains("handlerY") || !tag.contains("handlerZ")) {
             return null;
         }
         int x = tag.getInt("handlerX");
@@ -156,23 +158,23 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
         return getHandlerPosition(stack) != null;
     }
 
-    public boolean isValidHandler(EntityPlayer player, World world, BlockPos pos, boolean statusMessage) {
+    public boolean isValidHandler(PlayerEntity player, World world, BlockPos pos, boolean statusMessage) {
         return getFluidHandler(player, world, pos, statusMessage) != null;
     }
 
-    public IFluidHandler getFluidHandler(EntityPlayer player, BlockPos pos, boolean statusMessage) {
+    public IFluidHandler getFluidHandler(PlayerEntity player, BlockPos pos, boolean statusMessage) {
         TileEntity te = player.world.getTileEntity(pos);
         if(te != null) {
             IFluidHandler cap = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).orElse(null);
             if(cap != null) {
                 if(statusMessage)
-                    player.sendStatusMessage(new TextComponentTranslation("fluidgun.valid_handler"), false);
+                    player.sendStatusMessage(new TranslationTextComponent("fluidgun.valid_handler"), false);
                 return cap;
             } else if(statusMessage) {
-                player.sendStatusMessage(new TextComponentTranslation("fluidgun.invalid_handler"), false);
+                player.sendStatusMessage(new TranslationTextComponent("fluidgun.invalid_handler"), false);
             }
         } else if(statusMessage) {
-            player.sendStatusMessage(new TextComponentTranslation("fluidgun.invalid_handler"), false);
+            player.sendStatusMessage(new TranslationTextComponent("fluidgun.invalid_handler"), false);
         }
         return null;
     }
@@ -181,7 +183,7 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
     public IFluidHandler getFluidHandler(ItemStack stack) {
         if(this.getHandlerPosition(stack) != null) {
             if(this.hasHandlerDimension(stack)) {
-                World world = DimensionManager.getWorld(ServerLifecycleHooks.getCurrentServer(), DimensionType.getById(this.getHandlerDimension(stack)), false, false);
+                World world = ServerLifecycleHooks.getCurrentServer().getWorld(this.getHandlerDimension(stack));
                 if(world != null) {
                     TileEntity te = world.getTileEntity(this.getHandlerPosition(stack));
                     if(te != null) {
@@ -197,66 +199,67 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
     }
 
     public boolean hasHandlerDimension(ItemStack stack) {
-        NBTTagCompound tag = this.getCheckedTag(stack);
-        return tag.hasUniqueId("handlerDim");
+        CompoundNBT tag = this.getCheckedTag(stack);
+        return tag.contains("handlerDim");
     }
 
-    public IFluidHandler getFluidHandler(EntityPlayer player, World world, BlockPos pos, boolean statusMessage) {
+    public IFluidHandler getFluidHandler(PlayerEntity player, World world, BlockPos pos, boolean statusMessage) {
         TileEntity te = player.world.getTileEntity(pos);
         if(te != null) {
             IFluidHandler cap = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).orElse(null);
             if(cap != null) {
                 if(statusMessage)
-                    player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.valid_handler"), false);
+                    player.sendStatusMessage(new TranslationTextComponent("item.enderfluidgun.valid_handler"), false);
                 return cap;
             } else if(statusMessage) {
-                player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.invalid_handler"), false);
+                player.sendStatusMessage(new TranslationTextComponent("item.enderfluidgun.invalid_handler"), false);
             }
         } else if(statusMessage) {
-            player.sendStatusMessage(new TextComponentTranslation("item.enderfluidgun.invalid_handler"), false);
+            player.sendStatusMessage(new TranslationTextComponent("item.enderfluidgun.invalid_handler"), false);
         }
         return null;
     }
 
-    public int getHandlerDimension(ItemStack stack) {
-        NBTTagCompound tag = this.getCheckedTag(stack);
-        return tag.getInt("handlerDim");
+    public RegistryKey<World> getHandlerDimension(ItemStack stack) {
+        CompoundNBT tag = this.getCheckedTag(stack);
+        return RegistryKey.getOrCreateKey(Registry.WORLD_KEY, new ResourceLocation(tag.getString("handlerDim")));
     }
 
     public boolean hasHandlerDimensionTag(ItemStack stack) {
-        NBTTagCompound tag = this.getCheckedTag(stack);
-        return tag.hasUniqueId("handlerDim");
+        CompoundNBT tag = this.getCheckedTag(stack);
+        return tag.contains("handlerDim");
     }
     
     @OnlyIn(Dist.CLIENT)
     public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-        if(this.getContentsBuckets(stack) > 0) {
-            IFluidHandler handler = this.getFluidHandler(stack);
-            for(FluidStack fs : this.getFluidStacks(stack, handler)) {
-                String fluid = this.localizeFluid(stack, handler, fs);
-                boolean isLava = this.getFluidUnlocalizedName(stack, handler, fs).equals("fluid.tile.lava");
-                tooltip.add(new TextComponentString((isLava ? TextFormatting.GOLD : TextFormatting.BLUE) + fluid));
+        if(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY != null && this.getFluidHandler(stack) != null) {
+            if (this.getContentsBuckets(stack) > 0) {
+                IFluidHandler handler = this.getFluidHandler(stack);
+                for (FluidStack fs : this.getFluidStacks(handler)) {
+                    String fluid = this.localizeFluid(handler, fs);
+                    boolean isLava = this.getFluidUnlocalizedName(handler, fs).equals("fluid.tile.lava");
+                    tooltip.add(new StringTextComponent((isLava ? TextFormatting.GOLD : TextFormatting.BLUE) + fluid));
+                }
             }
-        }
-        tooltip.add(new TextComponentTranslation("item.fluidgun.contents", this.getContentsBuckets(stack) + "/" + this.getMaxCapacityBuckets(true, stack, this.getFluidHandler(stack))));
-        tooltip.add(new TextComponentTranslation("item.fluidgun.mode." + this.getMode(stack).name().toLowerCase() + ".info"));
-        if(GuiScreen.isShiftKeyDown()) {
-            tooltip.add(new TextComponentTranslation("item.fluidgun.range", this.getRange()));
+            tooltip.add(new TranslationTextComponent("item.fluidgun.contents", this.getContentsBuckets(stack), this.getMaxCapacityBuckets(this.getFluidHandler(stack))));
+            tooltip.add(new TranslationTextComponent("item.fluidgun.mode." + this.getMode(stack).name().toLowerCase() + ".info"));
+            if (Screen.hasShiftDown()) {
+                tooltip.add(new TranslationTextComponent("item.fluidgun.range", this.getRange()));
 
-            tooltip.add(new TextComponentTranslation("item.fluidgun.info"));
-            tooltip.add(new TextComponentTranslation("item.fluidgun.wheel.info"));
-            tooltip.add(new TextComponentTranslation("item.enderfluidgun.info"));
-            if(this.getFluidHandler(stack) != null && this.hasHandlerPositionTag(stack) && this.hasHandlerDimensionTag(stack)) {
-                tooltip.add(new TextComponentTranslation("item.enderfluidgun.linked"));
-                BlockPos pos = this.getHandlerPosition(stack);
-                tooltip.add(new TextComponentString("X: " + pos.getX()));
-                tooltip.add(new TextComponentString("Y: " + pos.getY()));
-                tooltip.add(new TextComponentString("Z: " + pos.getZ()));
-                tooltip.add(new TextComponentString("DIM: " + this.getHandlerDimension(stack)));
+                tooltip.add(new TranslationTextComponent("item.fluidgun.info"));
+                tooltip.add(new TranslationTextComponent("item.fluidgun.wheel.info"));
+                tooltip.add(new TranslationTextComponent("item.enderfluidgun.info"));
+                if (this.getFluidHandler(stack) != null && this.hasHandlerPositionTag(stack) && this.hasHandlerDimensionTag(stack)) {
+                    tooltip.add(new TranslationTextComponent("item.enderfluidgun.linked"));
+                    BlockPos pos = this.getHandlerPosition(stack);
+                    tooltip.add(new StringTextComponent("X: " + pos.getX()));
+                    tooltip.add(new StringTextComponent("Y: " + pos.getY()));
+                    tooltip.add(new StringTextComponent("Z: " + pos.getZ()));
+                    tooltip.add(new StringTextComponent("DIM: " + this.getHandlerDimension(stack)));
+                }
+            } else {
+                tooltip.add(new TranslationTextComponent("item.fluidgun.more.info"));
             }
-        } else {
-            tooltip.add(new TextComponentTranslation("item.fluidgun.more.info"));
         }
     }
     

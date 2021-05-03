@@ -1,4 +1,4 @@
-package its_meow.fluidgun.content;
+package dev.itsmeow.fluidgun.content;
 
 public enum ScrollMode {
 

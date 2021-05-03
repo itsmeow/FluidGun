@@ -1,13 +1,12 @@
-package its_meow.fluidgun.network;
+package dev.itsmeow.fluidgun.network;
 
-import java.util.function.Supplier;
-
-import com.google.common.base.Charsets;
-
-import its_meow.fluidgun.FluidGunConfigMain;
+import dev.itsmeow.fluidgun.FluidGunConfigMain;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
+
+import java.nio.charset.StandardCharsets;
+import java.util.function.Supplier;
 
 public class ConfigurationPacket {
 
@@ -15,8 +14,6 @@ public class ConfigurationPacket {
 
     public int capacity;
     public float range;
-
-    public ConfigurationPacket() {}
 
     public ConfigurationPacket(String itemName, int capacity, float range) {
         this.itemName = itemName;
@@ -26,7 +23,7 @@ public class ConfigurationPacket {
 
     public static ConfigurationPacket decode(PacketBuffer buf) {
         int len = buf.readInt();
-        String itemName = buf.readCharSequence(len, Charsets.UTF_8).toString();
+        String itemName = buf.readCharSequence(len, StandardCharsets.UTF_8).toString();
         int capacity = buf.readInt();
         float range = buf.readFloat();
         return new ConfigurationPacket(itemName, capacity, range);
@@ -34,7 +31,7 @@ public class ConfigurationPacket {
 
     public static void encode(ConfigurationPacket pkt, PacketBuffer buf) {
         buf.writeInt(pkt.itemName.length());
-        buf.writeCharSequence(pkt.itemName, Charsets.UTF_8);
+        buf.writeCharSequence(pkt.itemName, StandardCharsets.UTF_8);
         buf.writeInt(pkt.capacity);
         buf.writeFloat(pkt.range);
     }

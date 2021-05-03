@@ -1,71 +1,13 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
-    }
-}
-apply plugin: 'net.minecraftforge.gradle'
-//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
+apply from: 'https://maven.itsmeow.dev/scripts/fg3.gradle'
 
-version = '1.13-1.1.0'
-group = 'its_meow.fluidgun'
-archivesBaseName = 'fluidgun'
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-
-minecraft {
-    mappings channel: 'snapshot', version: '20190423-1.13.2'
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                fluidgun {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                fluidgun {
-                    source sourceSets.main
-                }
-            }
-        }
+repositories {
+    maven {
+        name = "JEI"
+        url = "http://dvs1.progwml6.com/files/maven"
     }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.13.2-25.0.193'
-}
-
-tasks.withType(JavaCompile) {
-  options.encoding = 'UTF-8'
-  options.compilerArgs = [
-    '-Xlint:deprecation', // deprecation, rawtypes, cast, unchecked, all
-    '-Xlint:unchecked',
-  ]
-}
-
-jar {
-    manifest {
-        attributes(["Specification-Title": archivesBaseName,
-                    "Specification-Vendor": "its_meow",
-                    "Specification-Version": version,
-                    "Implementation-Title": archivesBaseName,
-                    "Implementation-Version": version,
-                    "Implementation-Vendor" :"its_meow",
-                    "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")],)
-    }
+    compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${jei_version}")
 }

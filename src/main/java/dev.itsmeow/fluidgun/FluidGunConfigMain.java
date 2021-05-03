@@ -1,7 +1,11 @@
-package its_meow.fluidgun;
+package dev.itsmeow.fluidgun;
 
 import java.util.HashMap;
 
+import dev.itsmeow.fluidgun.content.ItemBaseFluidGun;
+import dev.itsmeow.fluidgun.content.ItemFluidGun;
+import net.minecraft.item.Item;
+import net.minecraftforge.fml.RegistryObject;
 import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -10,32 +14,32 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.config.ModConfig;
 
 public class FluidGunConfigMain {
-    
-    private static GunConfig ENTITY_CONFIG = null;
+
+    private static GunConfig GUN_CONFIG = null;
 
     public static ForgeConfigSpec SERVER_CONFIG = null;
 
     public static void setupConfig() {
         final Pair<GunConfig, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(GunConfig::new);
         SERVER_CONFIG = specPair.getRight();
-        ENTITY_CONFIG = specPair.getLeft();
+        GUN_CONFIG = specPair.getLeft();
     }
-    
+
     @SubscribeEvent
     public static void onLoad(final ModConfig.Loading configEvent) {
         if (configEvent.getConfig().getSpec() == SERVER_CONFIG) {
-            ENTITY_CONFIG.onLoad();
+            GUN_CONFIG.onLoad();
         }
     }
-    
+
     public static class GunConfig {
-        
-        public static HashMap<String, Integer> COUNT = new HashMap<String, Integer>();
-        public static HashMap<String, Float> RANGE = new HashMap<String, Float>();
-        
-        public static HashMap<String, ConfigValue<Integer>> COUNTC = new HashMap<String, ConfigValue<Integer>>();
-        public static HashMap<String, ConfigValue<Float>> RANGEC = new HashMap<String, ConfigValue<Float>>();
-        
+
+        public static HashMap<String, Integer> COUNT = new HashMap<>();
+        public static HashMap<String, Float> RANGE = new HashMap<>();
+
+        public static HashMap<String, ConfigValue<Integer>> COUNTC = new HashMap<>();
+        public static HashMap<String, ConfigValue<Float>> RANGEC = new HashMap<>();
+
         public GunConfig(ForgeConfigSpec.Builder builder) {
             builder.push("count");
             COUNT.forEach((gun, count) -> {
@@ -48,7 +52,7 @@ public class FluidGunConfigMain {
             });
             builder.pop();
         }
-        
+
         public void onLoad() {
             COUNTC.forEach((gun, countV) -> {
                 COUNT.put(gun, countV.get());
@@ -56,8 +60,17 @@ public class FluidGunConfigMain {
             RANGEC.forEach((gun, rangeV) -> {
                 RANGE.put(gun, rangeV.get());
             });
+            for(RegistryObject<Item> i : ModItems.getItems()) {
+                if(i.get() instanceof ItemBaseFluidGun) {
+                    ItemBaseFluidGun gun = (ItemBaseFluidGun) i.get();
+                    String name = gun.getRegistryName().getPath();
+                    if (gun instanceof ItemFluidGun) {
+                        ((ItemFluidGun) gun).setCapacity(FluidGunConfigMain.GunConfig.COUNT.get(name) * 1000);
+                    }
+                }
+            }
         }
-        
+
     }
-    
+
 }

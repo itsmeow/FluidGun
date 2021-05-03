@@ -12,24 +12,20 @@
     {
         "c":
         {
-        	"item": "minecraft:cauldron",
-        	"data": 0
+        	"item": "minecraft:cauldron"
         },
         "e":
         {
-        	"item": "minecraft:ender_eye",
-        	"data": 0
+        	"item": "minecraft:ender_eye"
         },
         "g":
         {
-        	"item": "fluidgun:large_fluid_gun",
-        	"data": 0
+        	"item": "fluidgun:large_fluid_gun"
         }
     },
     "result":
     {
         "item": "fluidgun:giant_fluid_gun",
-        "count": 1,
-        "data": 0
+        "count": 1
 	}
 }

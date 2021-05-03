@@ -5,14 +5,12 @@
     "type": "minecraft:crafting_shapeless",
 	"ingredients": [
 	    {
-	        "item": "fluidgun:fluid_gun",
-			"data": 0
+	        "item": "fluidgun:fluid_gun"
 	    }
 	],
     "result":
     {
         "item": "fluidgun:fluid_gun",
-        "count": 1,
-        "data": 0
+        "count": 1
 	}
 }
