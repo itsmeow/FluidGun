@@ -6,7 +6,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -50,11 +49,9 @@ public class ItemFluidGun extends ItemBaseFluidGun {
 
     @Override
     public ActionResult<ItemStack> onItemRightClick(World world, PlayerEntity player, Hand hand) {
-        if(world.isRemote) {
-            return super.onItemRightClick(world, player, hand);
+        if(!world.isRemote) {
+            this.onFired((ServerPlayerEntity) player, world, player.getHeldItem(hand), hand);
         }
-
-        this.onFired((ServerPlayerEntity) player, world, player.getHeldItem(hand), hand);
         return super.onItemRightClick(world, player, hand);
     }
 

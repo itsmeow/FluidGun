@@ -6,7 +6,6 @@ import net.minecraft.util.Hand;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 public class GunFiredPacket {
@@ -24,17 +23,15 @@ public class GunFiredPacket {
     }
 
     public static void encode(GunFiredPacket pkt, PacketBuffer buf) {
-        buf.writeInt(pkt.gunName.length());
-        buf.writeCharSequence(pkt.gunName, StandardCharsets.UTF_8);
-        buf.writeInt(pkt.hand.ordinal());
+        buf.writeString(pkt.gunName, 32);
+        buf.writeBoolean(pkt.hand == Hand.MAIN_HAND);
         buf.writeInt(pkt.count);
         buf.writeInt(pkt.max);
     }
 
     public static GunFiredPacket decode(PacketBuffer buf) {
-        int len1 = buf.readInt();
-        String gunName = buf.readCharSequence(len1, StandardCharsets.UTF_8).toString();
-        Hand hand = Hand.values()[buf.readInt()];
+        String gunName = buf.readString(32);
+        Hand hand = buf.readBoolean() ? Hand.MAIN_HAND : Hand.OFF_HAND;
         int count = buf.readInt();
         int max = buf.readInt();
         return new GunFiredPacket(gunName, hand, count, max);
@@ -44,10 +41,11 @@ public class GunFiredPacket {
 
         public static void handle(GunFiredPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if(ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
+                ctx.get().setPacketHandled(false);
                 return;
             }
-
-            ClientEvents.onGunFired(msg);
+            ctx.get().enqueueWork(() -> ClientEvents.onGunFired(msg));
+            ctx.get().setPacketHandled(true);
         }
 
     }

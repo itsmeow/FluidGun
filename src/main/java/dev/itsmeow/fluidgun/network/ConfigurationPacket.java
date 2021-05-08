@@ -5,7 +5,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
 public class ConfigurationPacket {
@@ -22,16 +21,14 @@ public class ConfigurationPacket {
     }
 
     public static ConfigurationPacket decode(PacketBuffer buf) {
-        int len = buf.readInt();
-        String itemName = buf.readCharSequence(len, StandardCharsets.UTF_8).toString();
+        String itemName = buf.readString(32);
         int capacity = buf.readInt();
         float range = buf.readFloat();
         return new ConfigurationPacket(itemName, capacity, range);
     }
 
     public static void encode(ConfigurationPacket pkt, PacketBuffer buf) {
-        buf.writeInt(pkt.itemName.length());
-        buf.writeCharSequence(pkt.itemName, StandardCharsets.UTF_8);
+        buf.writeString(pkt.itemName, 32);
         buf.writeInt(pkt.capacity);
         buf.writeFloat(pkt.range);
     }
@@ -40,11 +37,14 @@ public class ConfigurationPacket {
 
         public static void handle(ConfigurationPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if(ctx.get().getDirection() != NetworkDirection.PLAY_TO_CLIENT) {
+                ctx.get().setPacketHandled(false);
                 return;
             }
-
-            FluidGunConfigMain.GunConfig.COUNT.put(msg.itemName, msg.capacity);
-            FluidGunConfigMain.GunConfig.RANGE.put(msg.itemName, msg.range);
+            ctx.get().enqueueWork(() -> {
+                FluidGunConfigMain.GunConfig.COUNT.put(msg.itemName, msg.capacity);
+                FluidGunConfigMain.GunConfig.RANGE.put(msg.itemName, msg.range);
+            });
+            ctx.get().setPacketHandled(true);
         }
 
     }

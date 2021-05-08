@@ -1,17 +1,18 @@
 package dev.itsmeow.fluidgun;
 
-import java.util.HashMap;
-
 import dev.itsmeow.fluidgun.content.ItemBaseFluidGun;
 import dev.itsmeow.fluidgun.content.ItemFluidGun;
 import net.minecraft.item.Item;
-import net.minecraftforge.fml.RegistryObject;
-import org.apache.commons.lang3.tuple.Pair;
-
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.HashMap;
 
 public class FluidGunConfigMain {
 
@@ -68,6 +69,9 @@ public class FluidGunConfigMain {
                         ((ItemFluidGun) gun).setCapacity(FluidGunConfigMain.GunConfig.COUNT.get(name) * 1000);
                     }
                 }
+            }
+            if(EffectiveSide.get().isServer()) {
+                FluidGunMod.updateAllGunsConfig(true, null);
             }
         }
 

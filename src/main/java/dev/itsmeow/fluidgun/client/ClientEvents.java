@@ -34,7 +34,7 @@ public class ClientEvents {
             ItemStack stack = player.getHeldItem(hand);
             if(stack.getItem() instanceof ItemBaseFluidGun) {
                 if(Screen.hasAltDown() && e.getScrollDelta() != 0) {
-                    FluidGunMod.HANDLER.sendToServer(new MousePacket(hand == Hand.OFF_HAND, e.getScrollDelta() > 0));
+                    FluidGunMod.HANDLER.sendToServer(new MousePacket(hand, e.getScrollDelta() > 0));
                     e.setCanceled(true);
                 }
                 break; // If player is holding two only scroll for main hand

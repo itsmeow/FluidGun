@@ -19,7 +19,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -27,11 +26,11 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class ItemEnderFluidGun extends ItemBaseFluidGun {
 
@@ -46,8 +45,8 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
             return new ActionResult<>(ActionResultType.PASS, player.getHeldItem(hand));
         }
         if(player.isSneaking()) {
-            BlockRayTraceResult ray = this.rayTrace(world, player, RayTraceContext.FluidMode.NONE);
-            if(ray != null && ray.getType() == RayTraceResult.Type.BLOCK) {
+            BlockRayTraceResult ray = ItemBaseFluidGun.rayTrace(world, player, RayTraceContext.FluidMode.NONE);
+            if(ray.getType() == RayTraceResult.Type.BLOCK) {
                 BlockPos pos = ray.getPos();
                 if(this.isValidHandler(player, player.world, pos, true)) {
                     this.writeHandlerPosition(stack, pos);
@@ -165,11 +164,11 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
     public IFluidHandler getFluidHandler(PlayerEntity player, BlockPos pos, boolean statusMessage) {
         TileEntity te = player.world.getTileEntity(pos);
         if(te != null) {
-            IFluidHandler cap = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).orElse(null);
-            if(cap != null) {
+            Optional<IFluidHandler> handlerOpt = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).resolve();
+            if(handlerOpt.isPresent()) {
                 if(statusMessage)
                     player.sendStatusMessage(new TranslationTextComponent("fluidgun.valid_handler"), false);
-                return cap;
+                return handlerOpt.get();
             } else if(statusMessage) {
                 player.sendStatusMessage(new TranslationTextComponent("fluidgun.invalid_handler"), false);
             }
@@ -206,11 +205,11 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
     public IFluidHandler getFluidHandler(PlayerEntity player, World world, BlockPos pos, boolean statusMessage) {
         TileEntity te = player.world.getTileEntity(pos);
         if(te != null) {
-            IFluidHandler cap = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).orElse(null);
-            if(cap != null) {
+            Optional<IFluidHandler> handlerOpt = te.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null).resolve();
+            if(handlerOpt.isPresent()) {
                 if(statusMessage)
                     player.sendStatusMessage(new TranslationTextComponent("item.enderfluidgun.valid_handler"), false);
-                return cap;
+                return handlerOpt.get();
             } else if(statusMessage) {
                 player.sendStatusMessage(new TranslationTextComponent("item.enderfluidgun.invalid_handler"), false);
             }
