@@ -10,4 +10,9 @@ repositories {
 dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${jei_version}:api")
     runtimeOnly fg.deobf("mezz.jei:jei-${project.mc_version}:${jei_version}")
+    runtimeOnly fg.deobf("curse.maven:mekanism-268560:3206392")
+    runtimeOnly fg.deobf("curse.maven:thermal-foundation-222880:3248150")
+    runtimeOnly fg.deobf("curse.maven:thermal-expansion-69163:3247000")
+    runtimeOnly fg.deobf("curse.maven:cofh-core-69162:3249453")
+    runtimeOnly fg.deobf("curse.maven:immersive-engineering-231951:3233018")
 }

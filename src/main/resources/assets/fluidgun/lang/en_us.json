@@ -7,9 +7,9 @@
     "item.fluidgun.creative_fluid_gun": "Creative Fluid Gun",
     "item.fluidgun.ender_fluid_gun": "Ender Fluid Gun",
 
-    "item.fluidgun.contents": "§8Contents: §7%s/%s",
-    "item.fluidgun.max_capacity": "§6Max Capacity: §e%s",
-    "item.fluidgun.range": "Range: §e%s",
+    "item.fluidgun.contents": "§8Contents: %s§7/%s",
+    "item.fluidgun.max_capacity": "§6Max Capacity: %s",
+    "item.fluidgun.range": "§6Range: %s",
 
     "item.fluidgun.mode.both.info": "Mode: §aBoth",
     "item.fluidgun.mode.in.info": "Mode: §eIn Only",
@@ -18,5 +18,21 @@
     "item.fluidgun.more.info": "§eHold §cSHIFT§e for more",
 
     "item.fluidgun.info": "§6Adjusts in-out settings",
-    "item.fluidgun.wheel.info": "§cALT+Mouse wheel §eto cycle modes"
+    "item.fluidgun.wheel.info": "§cALT+Mouse wheel §eto cycle modes",
+    "item.enderfluidgun.info": "§cSHIFT+Right Click§b to link to fluid handlers (tanks, etc)",
+
+    "item.enderfluidgun.linked": "§aLinked",
+    "item.enderfluidgun.invalid_handler": "§cInvalid fluid handler. Not set.",
+    "item.enderfluidgun.valid_handler": "§aValid fluid handler. Fluid handler set!",
+    "item.enderfluidgun.handler_invalidated": "§cFluid handler is no longer valid. Please set a new one.",
+    "item.enderfluidgun.set_handler": "§eYou have no fluid handler linked! §cSHIFT+Right Click§e to link to fluid handlers (tanks, etc)",
+    "item.enderfluidgun.seperator.slash": "%s§7/%s",
+    "item.enderfluidgun.seperator.colon": "    %s§7: %s",
+    "item.enderfluidgun.tanks": "§7Tanks:",
+    "item.enderfluidgun.empty": "    §7Empty (0/%s§7)",
+    "item.enderfluidgun.x": "§8X: %s",
+    "item.enderfluidgun.y": "§8Y: %s",
+    "item.enderfluidgun.z": "§8Z: %s",
+    "item.enderfluidgun.dim": "§8Dimension: %s",
+    "item.enderfluidgun.side": "§8Side: %s"
 }
