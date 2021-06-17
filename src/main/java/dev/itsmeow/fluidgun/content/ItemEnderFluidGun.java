@@ -196,7 +196,20 @@ public class ItemEnderFluidGun extends ItemBaseFluidGun {
     }
 
     public static int handToSlot(PlayerEntity player, Hand hand) {
-        return hand == Hand.MAIN_HAND ? player.inventory.getSlotFor(player.getHeldItem(hand)) : player.inventory.mainInventory.size() + player.inventory.armorInventory.size();
+        return hand == Hand.MAIN_HAND ? getSlotFor(player, player.getHeldItem(hand)) : player.inventory.mainInventory.size() + player.inventory.armorInventory.size();
+    }
+
+    protected static int getSlotFor(PlayerEntity player, ItemStack stack) {
+        for(int i = 0; i < player.inventory.mainInventory.size(); ++i) {
+            if (!player.inventory.mainInventory.get(i).isEmpty() && stackEqualExact(stack, player.inventory.mainInventory.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    protected static boolean stackEqualExact(ItemStack stack1, ItemStack stack2) {
+        return stack1.getItem() == stack2.getItem() && ItemStack.areItemStackTagsEqual(stack1, stack2);
     }
 
     @OnlyIn(Dist.CLIENT)
